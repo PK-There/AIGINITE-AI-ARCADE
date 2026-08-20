@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Zap, Clock, CheckCircle2, XCircle, ArrowRight, Award, Sparkles, Binary, Cpu, ShieldAlert } from 'lucide-react';
+import { Zap, Clock, CheckCircle2, XCircle, ArrowRight, Award, Sparkles, Binary, Cpu, ShieldAlert, Loader2 } from 'lucide-react';
 import { RAPID_FIRE_CHALLENGES, RapidChallenge } from '../data/rapidFireData';
 import { PlayerScoreData, calculateSpeedBonus } from '../types';
 import { soundFx } from '../utils/audio';
@@ -31,17 +31,24 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
   const [totalScore, setTotalScore] = useState(0);
   const [totalSpeedBonus, setTotalSpeedBonus] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [challenges, setChallenges] = useState<RapidChallenge[]>([]);
 
   // Timing
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const challengeStartTimeRef = useRef<number>(Date.now());
   const gameStartTimeRef = useRef<number>(Date.now());
 
-  const currentChallenge: RapidChallenge = RAPID_FIRE_CHALLENGES[currentIndex];
+  useEffect(() => {
+    // Pick 10 random rapid fire challenges out of 200 questions bank
+    const shuffled = [...RAPID_FIRE_CHALLENGES].sort(() => 0.5 - Math.random());
+    setChallenges(shuffled.slice(0, 10));
+  }, []);
+
+  const currentChallenge: RapidChallenge = challenges[currentIndex];
 
   // Timer countdown
   useEffect(() => {
-    if (isFinished || isAnswerLocked) return;
+    if (challenges.length === 0 || isFinished || isAnswerLocked) return;
 
     challengeStartTimeRef.current = Date.now();
     setTimeLeft(currentChallenge.timeLimit);
@@ -66,7 +73,7 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [currentIndex, isAnswerLocked, isFinished]);
+  }, [currentIndex, isAnswerLocked, isFinished, challenges]);
 
   const handleTimeExpire = () => {
     if (isAnswerLocked) return;
@@ -120,7 +127,7 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
 
   const handleNext = () => {
     soundFx.playKeypress();
-    if (currentIndex + 1 < RAPID_FIRE_CHALLENGES.length) {
+    if (currentIndex + 1 < challenges.length) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setIsAnswerLocked(false);
@@ -191,6 +198,17 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
     );
   };
 
+  if (challenges.length === 0) {
+    return (
+      <div className="w-full min-h-[400px] flex flex-col items-center justify-center border-2 border-[#00F0FF] bg-[#0B0F19] rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.2)] p-6">
+        <Loader2 className="w-8 h-8 text-[#00F0FF] animate-spin animate-pulse" />
+        <span className="text-[10px] font-mono-ui uppercase tracking-[.25em] text-[#00F0FF]/60 mt-4">
+          Initiating high-velocity challenges...
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-6">
       {/* Immersive UI Arena Box */}
@@ -226,7 +244,7 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
                     {currentChallenge.title}
                   </span>
                   <span className="text-slate-400">
-                    RUSH {currentIndex + 1} OF {RAPID_FIRE_CHALLENGES.length}
+                    RUSH {currentIndex + 1} OF {challenges.length}
                   </span>
                 </div>
 
@@ -532,7 +550,7 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
                     onClick={handleNext}
                     className="bg-[#00F0FF] text-[#0B0F19] px-6 py-2 text-xs font-black shadow-[0_0_15px_rgba(0,240,255,0.6)] uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2"
                   >
-                    <span>{currentIndex + 1 < RAPID_FIRE_CHALLENGES.length ? 'NEXT MICRO-RUSH' : 'FINISH ROUND 1'}</span>
+                    <span>{currentIndex + 1 < challenges.length ? 'NEXT MICRO-RUSH' : 'FINISH ROUND 1'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -557,7 +575,7 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto text-left">
                 <div className="bg-[#0B0F19] border border-slate-800 p-3 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">CLEARED</span>
-                  <span className="text-lg font-bold text-[#39FF14]">{correctCount} / {RAPID_FIRE_CHALLENGES.length}</span>
+                  <span className="text-lg font-bold text-[#39FF14]">{correctCount} / {challenges.length}</span>
                 </div>
                 <div className="bg-[#0B0F19] border border-slate-800 p-3 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">BASE PTS</span>
