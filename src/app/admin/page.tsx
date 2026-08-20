@@ -648,41 +648,58 @@ export default function AdminPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 relative z-10 space-y-6">
         
         {/* Quick Stats Grid - Laptop Screen Optimization */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg">
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Active Squads</p>
-              <h3 className="text-xl font-black text-white mt-1">{teams.length}</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-zinc-950/60 border-white/5 rounded-xl shadow-lg">
+            <div className="p-4 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl bg-[#00F0FF]/10 border border-[#00F0FF]/20 shrink-0">
+                <Users className="w-5 h-5 text-[#00F0FF]" />
+              </div>
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Active Squads</p>
+                <h3 className="text-2xl font-black text-white leading-tight">{teams.length}</h3>
+              </div>
             </div>
-            <Users className="w-8 h-8 text-[#00F0FF]/60 shrink-0" />
           </Card>
           
-          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg">
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Total Operatives</p>
-              <h3 className="text-xl font-black text-white mt-1">{users.length}</h3>
+          <Card className="bg-zinc-950/60 border-white/5 rounded-xl shadow-lg">
+            <div className="p-4 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 shrink-0">
+                <Shield className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Total Operatives</p>
+                <h3 className="text-2xl font-black text-white leading-tight">{users.length}</h3>
+              </div>
             </div>
-            <Shield className="w-8 h-8 text-purple-500/60 shrink-0" />
           </Card>
 
-          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg">
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Global Top Score</p>
-              <h3 className="text-xl font-black text-[#FFB800] mt-1">
-                {teams.length > 0 ? Math.max(...teams.map(t => t.teamScore || 0)).toLocaleString() : 0} PTS
-              </h3>
+          <Card className="bg-zinc-950/60 border-white/5 rounded-xl shadow-lg">
+            <div className="p-4 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl bg-[#FFB800]/10 border border-[#FFB800]/20 shrink-0">
+                <Trophy className="w-5 h-5 text-[#FFB800]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Global Top Score</p>
+                <h3 className="text-2xl font-black text-[#FFB800] leading-tight truncate">
+                  {teams.length > 0 ? Math.max(...teams.map(t => t.teamScore || 0)).toLocaleString() : 0}
+                  <span className="text-sm font-bold ml-1">PTS</span>
+                </h3>
+              </div>
             </div>
-            <Trophy className="w-8 h-8 text-[#FFB800]/60 shrink-0" />
           </Card>
 
-          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg border-[#00F0FF]/10">
-            <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Active Phase</p>
-              <h3 className="text-xl font-black mt-1 text-[#00F0FF]">
-                {activeRound === 0 ? "LOBBY" : `ROUND 0${activeRound}`}
-              </h3>
+          <Card className="bg-zinc-950/60 border-[#00F0FF]/10 rounded-xl shadow-lg">
+            <div className="p-4 flex items-center gap-4">
+              <div className="p-2.5 rounded-xl bg-[#00F0FF]/10 border border-[#00F0FF]/20 shrink-0">
+                <Lock className="w-5 h-5 text-[#00F0FF]" />
+              </div>
+              <div>
+                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Active Phase</p>
+                <h3 className="text-2xl font-black text-[#00F0FF] leading-tight">
+                  {activeRound === 0 ? "LOBBY" : `ROUND 0${activeRound}`}
+                </h3>
+              </div>
             </div>
-            <Lock className="w-8 h-8 text-[#00F0FF]/60 shrink-0" />
           </Card>
         </div>
 
