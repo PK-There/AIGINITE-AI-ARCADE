@@ -165,9 +165,11 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
                 )}
               </div>
 
-              <p className="text-xs text-slate-300 font-sans leading-relaxed">
-                {currentItem.promptOrContext}
-              </p>
+              {currentItem.singleImage && (
+                <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                  {currentItem.promptOrContext}
+                </p>
+              )}
 
               {/* Binary Mode Image/Video/Audio/Text & Buttons */}
               {currentItem.type === 'binary' && (
@@ -185,6 +187,7 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
                             controls
                             autoPlay
                             loop
+                            muted
                             className="w-full h-[260px] sm:h-[360px] object-contain"
                           />
                         ) : isAudio ? (
