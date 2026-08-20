@@ -237,7 +237,7 @@ export const Subgame2Wordle: React.FC<Subgame2WordleProps> = ({
         basePoints += 300;
       }
     } else {
-      basePoints = 300;
+      basePoints = 0;
     }
 
     const speedBonus = isHumanWin ? calculateSpeedBonus(120, elapsedTime, 8) : 0;

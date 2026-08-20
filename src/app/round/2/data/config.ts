@@ -13,17 +13,17 @@ export const ROUND_CONFIG = {
 };
 
 export const SCORING_CONFIG: ScoringConfig = {
-  baseCorrectScore: 500,
+  baseCorrectScore: 125,
   bonusPerUnusedQuestion: {
-    1: 450, // 1 question used: total 950 base
-    2: 380, // 2 questions used: total 880 base
-    3: 280, // 3 questions used: total 780 base
-    4: 150, // 4 questions used: total 650 base
-    5: 0,   // 5 questions used: total 500 base
+    1: 100, // 1 clue unlocked: total 225 base
+    2: 80,  // 2 clues unlocked: total 205 base
+    3: 60,  // 3 clues unlocked: total 185 base
+    4: 35,  // 4 clues unlocked: total 160 base
+    5: 0,   // 5 clues unlocked: total 125 base
   },
-  timeBonusFactor: 2, // 2 points per second saved
+  timeBonusFactor: 0.5, // 0.5 points per second saved
   wrongGuessPenalty: 0,
-  maxPossibleScore: 1000,
+  maxPossibleScore: 250,
 };
 
 export const SAMPLE_TEAMS: Team[] = [

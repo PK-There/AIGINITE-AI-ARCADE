@@ -85,6 +85,8 @@ export interface GameState {
   guessCorrect: boolean;
   finalScore: number;
   soundEnabled: boolean;
+  guessesRemaining: number;
+  guessHistory: string[];
 }
 
 export interface ScoringConfig {

@@ -6,7 +6,7 @@ import { Target, Send, AlertCircle, Sparkles, Award } from 'lucide-react';
 
 export const FinalGuessCard: React.FC = () => {
   const { gameState, submitFinalGuess } = useGame();
-  const { questionHistory, maxQuestions, timeRemainingSec } = gameState;
+  const { questionHistory, maxQuestions, timeRemainingSec, guessesRemaining, guessHistory } = gameState;
   const [guessInput, setGuessInput] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
 
@@ -22,6 +22,7 @@ export const FinalGuessCard: React.FC = () => {
 
     setErrorMsg('');
     submitFinalGuess(guessInput.trim());
+    setGuessInput('');
   };
 
   return (
@@ -56,6 +57,22 @@ export const FinalGuessCard: React.FC = () => {
           </span>
         </div>
 
+        {/* Guess History List */}
+        {guessHistory && guessHistory.length > 0 && (
+          <div className="bg-rose-500/5 border border-rose-500/20 p-4 rounded-2xl space-y-2 text-xs">
+            <span className="font-mono-code font-bold text-rose-400 block uppercase tracking-wider">
+              ❌ INCORRECT ATTEMPTS ({guessHistory.length} / 3):
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {guessHistory.map((g, idx) => (
+                <span key={idx} className="px-2.5 py-1 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-300 font-semibold font-mono">
+                  "{g}"
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
@@ -88,13 +105,13 @@ export const FinalGuessCard: React.FC = () => {
             className="w-full py-4 sm:py-5 px-8 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 font-display font-black text-lg sm:text-xl text-white tracking-wider uppercase flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/30 hover:scale-[1.01] transition-all cursor-pointer border border-cyan-300/40"
           >
             <Sparkles className="w-6 h-6 text-cyan-200" />
-            <span>SUBMIT MY FINAL GUESS</span>
+            <span>SUBMIT MY FINAL GUESS ({guessesRemaining} attempts left)</span>
             <Send className="w-5 h-5" />
           </button>
         </form>
 
         <p className="text-center text-xs text-slate-500 font-mono-code">
-          Submitting final guess stops the clock and locks in my Round 2 ranking.
+          Submitting a correct guess stops the clock and locks in my Round 2 ranking. 3 attempts max.
         </p>
 
       </div>
