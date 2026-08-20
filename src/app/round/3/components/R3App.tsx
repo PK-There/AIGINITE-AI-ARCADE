@@ -30,7 +30,16 @@ export function R3App({ finalists, myTeamId, userName }: Props) {
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white flex flex-col">
-
+      {/* Ticker ribbon */}
+      <div className="overflow-hidden border-b border-white/5 bg-[#0d1117]/80 py-2 font-mono-ui text-[9px] uppercase tracking-[.2em] text-zinc-600">
+        <div className="ticker-track flex w-max gap-10 whitespace-nowrap">
+          <span>AIGNITE AI ARCADE / FINAL ROUND</span>
+          <span>6 TEAMS / 10 PROMPTS / 10 MINUTES</span>
+          <span>IDEAS BUILT UNDER PRESSURE</span>
+          <span>AIGNITE AI ARCADE / FINAL ROUND</span>
+          <span>6 TEAMS / 10 PROMPTS / 10 MINUTES</span>
+        </div>
+      </div>
 
       <R3Header />
 

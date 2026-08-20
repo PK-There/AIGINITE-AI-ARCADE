@@ -94,7 +94,16 @@ const GameContent: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-[#0d1117] text-white flex flex-col font-mono selection:bg-[#d9ff52]/30 selection:text-[#d9ff52]">
-
+      {/* Ticker ribbon */}
+      <div className="overflow-hidden border-b border-white/5 bg-[#0d1117]/80 py-2 font-mono-ui text-[9px] uppercase tracking-[.2em] text-zinc-600">
+        <div className="ticker-track flex w-max gap-10 whitespace-nowrap">
+          <span>AIGNITE AI ARCADE / ROUND 02</span>
+          <span>AI WHO AM I? / MYSTERY DEDUCTION</span>
+          <span>ASK SMART. THINK SMARTER.</span>
+          <span>AIGNITE AI ARCADE / ROUND 02</span>
+          <span>AI WHO AM I? / MYSTERY DEDUCTION</span>
+        </div>
+      </div>
 
       {/* Back to Dashboard strip */}
       <div className="relative z-50 flex items-center gap-3 px-4 py-2 border-b border-white/5 bg-[#0d1117]/80 backdrop-blur">
