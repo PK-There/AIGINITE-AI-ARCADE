@@ -13,7 +13,7 @@ export function R3Lobby({ myTeamId, userName }: Props) {
 
   const readyCount = state.teams.filter(t => t.ready).length;
   const totalTeams = state.teams.length;
-  const allReady = readyCount === totalTeams && totalTeams > 0;
+  const allReady = readyCount > 0; // Configured to require at least 1 ready team for testing/checking
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-10 sm:px-10 space-y-10">
@@ -27,7 +27,7 @@ export function R3Lobby({ myTeamId, userName }: Props) {
           Build<br /><span className="text-[#d9ff52]">under</span><br />pressure.
         </h1>
         <p className="mt-5 max-w-lg text-sm leading-7 text-zinc-400">
-          Six finalist teams. One shared arena. Ten prompts to turn a sharp problem into a product worth talking about. Wait for all teams to mark ready, then the host starts the clock.
+          Shared arena. Ten prompts to turn a sharp problem into a product worth talking about. Wait for at least one team to mark ready, then start the clock.
         </p>
       </div>
 
@@ -106,7 +106,7 @@ export function R3Lobby({ myTeamId, userName }: Props) {
         </div>
         <div className={`border rounded-md p-3 text-center ${allReady ? "border-[#d9ff52]/40 bg-[#d9ff52]/5" : "border-white/5 bg-[#0d1117]/40"}`}>
           <p className="font-mono-ui text-[10px] font-bold uppercase tracking-widest">
-            {allReady ? `All ${totalTeams} teams are ready ✓` : `Waiting for ${totalTeams - readyCount} more team(s)…`}
+            {allReady ? `Ready to start ✓ (${readyCount}/${totalTeams} teams ready)` : `Waiting for at least 1 team to be ready…`}
           </p>
         </div>
         <button
