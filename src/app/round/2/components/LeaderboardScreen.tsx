@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const LeaderboardScreen: React.FC = () => {
-  const { leaderboard, gameState, restartGame, navigateToScreen, selectTeam, teamsList } = useGame();
+  const { leaderboard, gameState, restartGame, navigateToScreen, selectTeam, teamsList, isCaptain } = useGame();
   const { team: currentTeam } = gameState;
   const [animatedScores, setAnimatedScores] = useState<Record<string, number>>({});
 
@@ -179,17 +179,19 @@ export const LeaderboardScreen: React.FC = () => {
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          <button
-            id="back-to-arcade-btn"
-            type="button"
-            onClick={restartGame}
-            className="px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-display font-bold text-sm sm:text-base text-slate-200 uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>BACK TO ARCADE</span>
-          </button>
-        </div>
+        {isCaptain && (
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <button
+              id="back-to-arcade-btn"
+              type="button"
+              onClick={restartGame}
+              className="px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-display font-bold text-sm sm:text-base text-slate-200 uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>BACK TO ARCADE</span>
+            </button>
+          </div>
+        )}
 
       </div>
     </div>

@@ -66,10 +66,6 @@ const GameContent: React.FC = () => {
     return <Round2LockedScreen reason="admin" />;
   }
 
-  if (!isCaptain) {
-    return <Round2LockedScreen reason="captain" />;
-  }
-
   return (
     <div className="relative min-h-screen bg-[#0d1117] text-white flex flex-col font-mono selection:bg-[#d9ff52]/30 selection:text-[#d9ff52]">
       {/* Ticker ribbon */}
@@ -94,12 +90,18 @@ const GameContent: React.FC = () => {
       <Header />
 
       <div className="relative z-10 flex-1 flex flex-col">
-        {screen === 'INTRO' && <IntroScreen />}
-        {screen === 'INITIALIZING' && <InitializingScreen />}
-        {screen === 'GAMEPLAY' && <GameplayScreen />}
-        {screen === 'RESULT' && <ResultScreen />}
-        {screen === 'ROUND_COMPLETE' && <RoundCompleteScreen />}
-        {screen === 'LEADERBOARD' && <LeaderboardScreen />}
+        {!isCaptain ? (
+          <LeaderboardScreen />
+        ) : (
+          <>
+            {screen === 'INTRO' && <IntroScreen />}
+            {screen === 'INITIALIZING' && <InitializingScreen />}
+            {screen === 'GAMEPLAY' && <GameplayScreen />}
+            {screen === 'RESULT' && <ResultScreen />}
+            {screen === 'ROUND_COMPLETE' && <RoundCompleteScreen />}
+            {screen === 'LEADERBOARD' && <LeaderboardScreen />}
+          </>
+        )}
       </div>
 
       <footer className="relative z-10 py-4 px-4 text-center border-t border-white/5 bg-[#0d1117] font-mono-ui text-[10px] uppercase tracking-widest text-zinc-600">

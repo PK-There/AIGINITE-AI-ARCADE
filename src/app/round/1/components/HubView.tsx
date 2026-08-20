@@ -216,12 +216,9 @@ export const HubView: React.FC<HubViewProps> = ({
                   </button>
                 )}
                 {isCompleted && (
-                  <button
-                    onClick={() => onLaunchGame(pId)}
-                    className="font-mono-ui text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-lg hover:border-white/30 transition-all"
-                  >
-                    Review <ChevronRight className="w-3 h-3" />
-                  </button>
+                  <span className="font-mono-ui text-[10px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg">
+                    Completed
+                  </span>
                 )}
                 {isLocked && (
                   <span className="font-mono-ui text-[9px] text-zinc-600 italic">

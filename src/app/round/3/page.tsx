@@ -46,7 +46,7 @@ export default function Round3Page() {
 
         // 2. Get top-1 team by teamScore (configured to 1 team for testing/checking)
         const teamsRef = collection(db, "teams");
-        const q = query(teamsRef, orderBy("teamScore", "desc"), limit(1));
+        const q = query(teamsRef, orderBy("teamScore", "desc"), limit(2));
         const snap = await getDocs(q);
 
         let top6 = snap.docs.map(d => ({
