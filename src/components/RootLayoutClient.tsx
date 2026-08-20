@@ -5,10 +5,10 @@ import { BottomNav } from "@/components/BottomNav";
 
 export function RootLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isRoundPage = pathname.startsWith("/round/");
+  const isFullScreenPage = pathname.startsWith("/round/") || pathname === "/admin";
 
-  // Round pages are full-screen game apps — no mobile container or bottom nav
-  if (isRoundPage) {
+  // Full-screen pages (Rounds & Admin Portal) — no mobile container or bottom nav
+  if (isFullScreenPage) {
     return <>{children}</>;
   }
 

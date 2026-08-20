@@ -586,8 +586,47 @@ export default function AdminPage() {
       </header>
 
       {/* Main panel body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 relative z-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 relative z-10 space-y-6">
         
+        {/* Quick Stats Grid - Laptop Screen Optimization */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg">
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Active Squads</p>
+              <h3 className="text-xl font-black text-white mt-1">{teams.length}</h3>
+            </div>
+            <Users className="w-8 h-8 text-[#00F0FF]/60 shrink-0" />
+          </Card>
+          
+          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg">
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Total Operatives</p>
+              <h3 className="text-xl font-black text-white mt-1">{users.length}</h3>
+            </div>
+            <Shield className="w-8 h-8 text-purple-500/60 shrink-0" />
+          </Card>
+
+          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg">
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Global Top Score</p>
+              <h3 className="text-xl font-black text-[#FFB800] mt-1">
+                {teams.length > 0 ? Math.max(...teams.map(t => t.teamScore || 0)).toLocaleString() : 0} PTS
+              </h3>
+            </div>
+            <Trophy className="w-8 h-8 text-[#FFB800]/60 shrink-0" />
+          </Card>
+
+          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg border-amber-500/10">
+            <div>
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Round 2 Gate</p>
+              <h3 className={`text-xl font-black mt-1 ${round2Active ? "text-emerald-400" : "text-amber-500"}`}>
+                {round2Active ? "ACTIVE" : "LOCKED"}
+              </h3>
+            </div>
+            <Lock className="w-8 h-8 text-amber-500/60 shrink-0" />
+          </Card>
+        </div>
+
         {/* LEADERBOARD VIEW */}
         {activeTab === "leaderboard" && (
           <div className="space-y-6">
@@ -687,7 +726,7 @@ export default function AdminPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredTeams.map((team) => {
                 const isEditing = editingTeamId === team.id;
 
