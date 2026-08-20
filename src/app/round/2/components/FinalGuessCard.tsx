@@ -61,7 +61,7 @@ export const FinalGuessCard: React.FC = () => {
         {guessHistory && guessHistory.length > 0 && (
           <div className="bg-rose-500/5 border border-rose-500/20 p-4 rounded-2xl space-y-2 text-xs">
             <span className="font-mono-code font-bold text-rose-400 block uppercase tracking-wider">
-              ❌ INCORRECT ATTEMPTS ({guessHistory.length} / 3):
+              ❌ INCORRECT ATTEMPTS ({guessHistory.length} / 2):
             </span>
             <div className="flex flex-wrap gap-2">
               {guessHistory.map((g, idx) => (
@@ -111,7 +111,7 @@ export const FinalGuessCard: React.FC = () => {
         </form>
 
         <p className="text-center text-xs text-slate-500 font-mono-code">
-          Submitting a correct guess stops the clock and locks in my Round 2 ranking. 3 attempts max.
+          Submitting a correct guess stops the clock and locks in my Round 2 ranking. 2 attempts max.
         </p>
 
       </div>
