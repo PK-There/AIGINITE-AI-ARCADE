@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Brain, Clock, Zap, CheckCircle2, XCircle, ArrowRight, Award, RotateCcw, Sparkles } from 'lucide-react';
+import { Brain, Clock, Zap, CheckCircle2, XCircle, ArrowRight, Award, RotateCcw, Sparkles, Loader2 } from 'lucide-react';
 import { QUIZ_QUESTIONS, QuizQuestion } from '../data/quizData';
 import { PlayerScoreData, calculateSpeedBonus } from '../types';
 import { soundFx } from '../utils/audio';
@@ -26,17 +26,24 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
   const [totalSpeedBonus, setTotalSpeedBonus] = useState(0);
   const [streak, setStreak] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
 
   // Timing refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const questionStartTimeRef = useRef<number>(Date.now());
   const gameStartTimeRef = useRef<number>(Date.now());
 
-  const currentQ: QuizQuestion = QUIZ_QUESTIONS[currentIndex];
+  useEffect(() => {
+    // Pick 10 random questions out of the 200 questions bank
+    const shuffled = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random());
+    setQuestions(shuffled.slice(0, 10));
+  }, []);
+
+  const currentQ: QuizQuestion = questions[currentIndex];
 
   // Timer loop
   useEffect(() => {
-    if (isFinished || isAnswerLocked) return;
+    if (questions.length === 0 || isFinished || isAnswerLocked) return;
 
     questionStartTimeRef.current = Date.now();
     setTimeLeft(currentQ.timeLimit);
@@ -60,7 +67,7 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [currentIndex, isAnswerLocked, isFinished]);
+  }, [currentIndex, isAnswerLocked, isFinished, questions]);
 
   const handleTimeExpire = () => {
     if (isAnswerLocked) return;
@@ -100,7 +107,7 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
 
   const handleNextQuestion = () => {
     soundFx.playKeypress();
-    if (currentIndex + 1 < QUIZ_QUESTIONS.length) {
+    if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswerLocked(false);
@@ -139,7 +146,18 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
     onComplete(result);
   };
 
-  const timerPercent = (timeLeft / currentQ.timeLimit) * 100;
+  const timerPercent = currentQ ? (timeLeft / currentQ.timeLimit) * 100 : 100;
+
+  if (questions.length === 0) {
+    return (
+      <div className="w-full min-h-[400px] flex flex-col items-center justify-center border-2 border-[#00F0FF] bg-[#0B0F19] rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.2)] p-6">
+        <Loader2 className="w-8 h-8 text-[#00F0FF] animate-spin animate-pulse" />
+        <span className="text-[10px] font-mono-ui uppercase tracking-[.25em] text-[#00F0FF]/60 mt-4">
+          Shuffling Neural Matrix trivia...
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6">
@@ -184,7 +202,7 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
                     CATEGORY: {currentQ.category}
                   </span>
                   <span className="text-slate-400">
-                    QUESTION {currentIndex + 1} OF {QUIZ_QUESTIONS.length}
+                    QUESTION {currentIndex + 1} OF {questions.length}
                   </span>
                 </div>
 
@@ -259,7 +277,7 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
                       onClick={handleNextQuestion}
                       className="bg-[#00F0FF] text-[#0B0F19] px-6 py-2 text-xs font-black shadow-[0_0_15px_rgba(0,240,255,0.6)] uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2"
                     >
-                      <span>{currentIndex + 1 < QUIZ_QUESTIONS.length ? 'NEXT QUESTION' : 'VIEW STAGE SUMMARY'}</span>
+                      <span>{currentIndex + 1 < questions.length ? 'NEXT QUESTION' : 'VIEW STAGE SUMMARY'}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -285,7 +303,7 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto text-left">
                 <div className="bg-[#0B0F19] border border-slate-800 p-3 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">CORRECT</span>
-                  <span className="text-lg font-bold text-[#39FF14]">{correctCount} / {QUIZ_QUESTIONS.length}</span>
+                  <span className="text-lg font-bold text-[#39FF14]">{correctCount} / {questions.length}</span>
                 </div>
                 <div className="bg-[#0B0F19] border border-slate-800 p-3 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">BASE PTS</span>
