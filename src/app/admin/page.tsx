@@ -255,46 +255,30 @@ export default function AdminPage() {
     }
   };
 
-  // Reset ALL Teams in the tournament
+  // Reset ALL Teams in the tournament (Tournament Wipe)
   const handleResetAllTeams = async () => {
-    if (!window.confirm("WARNING: Are you sure you want to reset ALL teams in the tournament? This will clear all scores, times, and round progress states for every team.")) return;
-    if (!window.confirm("DOUBLE CONFIRMATION: This is irreversible. Clear all tournament standings?")) return;
+    if (!window.confirm("WARNING: Are you sure you want to PERMANENTLY DELETE all teams and reset all player team affiliations? This will wipe the entire tournament and allow everyone to create or join teams from scratch.")) return;
+    if (!window.confirm("DOUBLE CONFIRMATION: This is irreversible. Confirm complete tournament reset?")) return;
 
     try {
+      // 1. Delete all team documents
       for (const team of teams) {
-        const resetState = {
-          teamName: team.name,
-          teamId: team.code,
-          currentStage: 1,
-          teamScore: 0,
-          totalTime: 0,
-          playerStatus: {
-            1: "ACTIVE",
-            2: "LOCKED",
-            3: "LOCKED",
-            4: "LOCKED",
-          },
-          playerScores: {
-            1: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
-            2: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
-            3: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
-            4: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
-          },
-          startTime: Date.now(),
-          isFinished: false,
-        };
-
-        await updateDoc(doc(db, "teams", team.id), {
-          round1State: resetState,
-          teamScore: 0,
-          totalTime: 0,
-          status: "READY",
-        });
+        await deleteDoc(doc(db, "teams", team.id));
       }
-      soundFx.playCorrect();
-      alert("All teams successfully reset to initial states!");
+
+      // 2. Clear teamId for all users
+      for (const u of users) {
+        if (u.teamId) {
+          await updateDoc(doc(db, "users", u.uid), {
+            teamId: null,
+          });
+        }
+      }
+
+      soundFx.playWrong();
+      alert("Tournament successfully wiped! All teams deleted and player affiliations cleared.");
     } catch (err) {
-      console.error("Failed to reset all teams:", err);
+      console.error("Failed to reset tournament:", err);
       alert("Error resetting tournament: " + (err as Error).message);
     }
   };

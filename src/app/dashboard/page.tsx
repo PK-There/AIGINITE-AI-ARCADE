@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import { Loader2, Gamepad2, Users, Swords, Trophy, LogOut, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,35 +20,49 @@ export default function DashboardPage() {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubTeam: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       if (!firebaseUser) {
         router.push("/auth");
         return;
       }
       setUser(firebaseUser);
-      
-      try {
-        const docRef = doc(db, "users", firebaseUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.role === "admin") {
-            setIsAdmin(true);
-          }
-          if (data.teamId) {
-            const teamSnap = await getDoc(doc(db, "teams", data.teamId));
-            if (teamSnap.exists()) {
-              setUserTeam({ id: teamSnap.id, ...teamSnap.data() });
+
+      // Listen to user document in real-time
+      const unsubUser = onSnapshot(doc(db, "users", firebaseUser.uid), (userSnap) => {
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setIsAdmin(userData.role === "admin");
+          
+          if (userData.teamId) {
+            // Listen to team document in real-time
+            if (unsubTeam) unsubTeam();
+            unsubTeam = onSnapshot(doc(db, "teams", userData.teamId), (teamSnap) => {
+              if (teamSnap.exists()) {
+                setUserTeam({ id: teamSnap.id, ...teamSnap.data() });
+              } else {
+                setUserTeam(null);
+              }
+            });
+          } else {
+            if (unsubTeam) {
+              unsubTeam();
+              unsubTeam = null;
             }
+            setUserTeam(null);
           }
         }
-      } catch (err) {
-        console.error("Failed to load user privileges:", err);
-      }
+        setLoading(false);
+      });
 
-      setLoading(false);
+      return () => {
+        unsubUser();
+        if (unsubTeam) unsubTeam();
+      };
     });
-    return () => unsubscribe();
+
+    return () => unsubscribeAuth();
   }, [router]);
 
   const handleSignOut = async () => {
