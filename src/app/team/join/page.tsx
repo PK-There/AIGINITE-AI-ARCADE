@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, query, where, getDocs, updateDoc, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,7 +39,11 @@ export default function JoinTeamPage() {
       
       try {
         const userSnap = await getDoc(doc(db, "users", u.uid));
-        if (userSnap.exists() && userSnap.data().teamId) {
+        if (!userSnap.exists()) {
+          router.push("/register");
+          return;
+        }
+        if (userSnap.data().teamId) {
           router.push("/dashboard");
           return;
         }
@@ -111,7 +115,7 @@ export default function JoinTeamPage() {
         members: [...(teamData.members || []), user.uid],
         memberNames: [...(teamData.memberNames || []), displayName],
       });
-      await updateDoc(doc(db, "users", user.uid), { teamId });
+      await setDoc(doc(db, "users", user.uid), { teamId }, { merge: true });
 
       router.push("/dashboard");
     } catch (err: any) {

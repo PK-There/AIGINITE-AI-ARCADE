@@ -11,6 +11,7 @@ import {
   updateDoc,
   deleteDoc,
   onSnapshot,
+  setDoc,
 } from "firebase/firestore";
 import {
   Shield,
@@ -141,9 +142,9 @@ export default function AdminPage() {
     if (passcode.trim() === "AIGNITE2026") {
       if (currentUser) {
         try {
-          await updateDoc(doc(db, "users", currentUser.uid), {
+          await setDoc(doc(db, "users", currentUser.uid), {
             role: "admin",
-          });
+          }, { merge: true });
           setIsAdmin(true);
           soundFx.playCorrect();
         } catch (err) {
@@ -190,9 +191,9 @@ export default function AdminPage() {
         captainId: newCaptainId,
       });
 
-      await updateDoc(doc(db, "users", memberUid), {
+      await setDoc(doc(db, "users", memberUid), {
         teamId: null,
-      });
+      }, { merge: true });
 
       soundFx.playCorrect();
     } catch (err) {
@@ -244,9 +245,9 @@ export default function AdminPage() {
     if (!window.confirm(`PERMANENTLY DELETE Team "${team.name}"? This cannot be undone.`)) return;
     try {
       for (const memberUid of team.members) {
-        await updateDoc(doc(db, "users", memberUid), {
+        await setDoc(doc(db, "users", memberUid), {
           teamId: null,
-        });
+        }, { merge: true });
       }
       await deleteDoc(doc(db, "teams", team.id));
       soundFx.playWrong();
@@ -269,9 +270,9 @@ export default function AdminPage() {
       // 2. Clear teamId for all users
       for (const u of users) {
         if (u.teamId) {
-          await updateDoc(doc(db, "users", u.uid), {
+          await setDoc(doc(db, "users", u.uid), {
             teamId: null,
-          });
+          }, { merge: true });
         }
       }
 
@@ -297,9 +298,9 @@ export default function AdminPage() {
         updateData.teamId = editUserTeamId.trim();
       }
 
-      await updateDoc(doc(db, "users", uid), {
+      await setDoc(doc(db, "users", uid), {
         ...updateData,
-      });
+      }, { merge: true });
 
       setEditingUserId(null);
       soundFx.playCorrect();
@@ -312,9 +313,9 @@ export default function AdminPage() {
   const handleToggleAdmin = async (user: UserProfile) => {
     try {
       const newRole = user.role === "admin" ? "" : "admin";
-      await updateDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, "users", user.uid), {
         role: newRole,
-      });
+      }, { merge: true });
       soundFx.playCorrect();
     } catch (err) {
       console.error("Failed to toggle admin role:", err);

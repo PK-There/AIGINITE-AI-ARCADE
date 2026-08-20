@@ -34,7 +34,11 @@ export default function CreateTeamPage() {
       
       try {
         const userSnap = await getDoc(doc(db, "users", u.uid));
-        if (userSnap.exists() && userSnap.data().teamId) {
+        if (!userSnap.exists()) {
+          router.push("/register");
+          return;
+        }
+        if (userSnap.data().teamId) {
           router.push("/dashboard");
           return;
         }
@@ -49,7 +53,8 @@ export default function CreateTeamPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!teamName.trim() || !user) return;
+    if (!user || !teamName.trim()) return;
+
     setSaving(true);
     setError(null);
 
@@ -69,11 +74,13 @@ export default function CreateTeamPage() {
         roundStatus: { round1: "pending", round2: "pending" },
       });
 
-      await updateDoc(doc(db, "users", user.uid), { teamId });
+      await setDoc(doc(db, "users", user.uid), { teamId }, { merge: true });
 
       setCreatedCode(code);
+      soundFx.playCorrect();
     } catch (err: any) {
-      setError("Failed to create team. Make sure Firestore is set up.");
+      console.error(err);
+      setError(err?.message || "Failed to create team. Please try again.");
     } finally {
       setSaving(false);
     }

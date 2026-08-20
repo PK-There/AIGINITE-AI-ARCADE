@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc, onSnapshot, setDoc } from "firebase/firestore";
 import { Loader2, Gamepad2, Users, Swords, Trophy, LogOut, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +52,10 @@ export default function DashboardPage() {
             }
             setUserTeam(null);
           }
+        } else {
+          // If the profile document doesn't exist, redirect to registration
+          router.push("/register");
+          return;
         }
         setLoading(false);
       });
@@ -91,9 +95,7 @@ export default function DashboardPage() {
         });
       }
 
-      await updateDoc(doc(db, "users", user.uid), {
-        teamId: null,
-      });
+      await setDoc(doc(db, "users", user.uid), { teamId: null }, { merge: true });
 
       setUserTeam(null);
     } catch (err) {
