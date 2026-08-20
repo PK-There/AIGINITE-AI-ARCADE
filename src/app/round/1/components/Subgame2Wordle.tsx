@@ -378,8 +378,8 @@ export const Subgame2Wordle: React.FC<Subgame2WordleProps> = ({
                               else if (k === 'DEL') handleBackspace();
                               else handleLetterInput(k);
                             }}
-                            className={`p-1.5 sm:p-2 text-center text-[10px] sm:text-xs rounded font-mono transition-all uppercase ${
-                              isSpecial ? 'px-2.5 sm:px-3 text-[9px] sm:text-[10px] font-bold' : 'w-7 sm:w-8'
+                            className={`p-2 sm:p-3.5 text-center text-xs sm:text-base rounded font-mono transition-all uppercase font-black flex items-center justify-center ${
+                              isSpecial ? 'px-3.5 sm:px-6 text-[10px] sm:text-xs' : 'w-9 sm:w-14 h-9 sm:h-12'
                             } ${keyClass}`}
                           >
                             {k}
