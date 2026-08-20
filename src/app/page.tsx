@@ -6,44 +6,44 @@ import Link from "next/link";
 
 export default function MobileLandingPage() {
   return (
-    <div className="relative min-h-screen bg-background flex flex-col overflow-x-hidden pt-4 pb-8">
+    <div className="relative min-h-screen bg-background flex flex-col overflow-x-hidden pt-2 pb-6">
       
       {/* Background Effect */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(168,85,247,0.15),transparent)]"></div>
 
-      <main className="flex-1 relative z-10 w-full flex flex-col px-5 space-y-12">
+      <main className="flex-1 relative z-10 w-full flex flex-col px-5 space-y-6">
         
         {/* HEADER / LOGO */}
-        <header className="flex justify-center pt-8 pb-2">
-          <img src="/AIGNITE%20LOGO.png" alt="Aignite Logo" className="h-36 drop-shadow-[0_0_35px_rgba(168,85,247,0.7)]" />
+        <header className="flex justify-center pt-4 pb-0">
+          <img src="/AIGNITE%20LOGO.png" alt="Aignite Logo" className="h-28 drop-shadow-[0_0_35px_rgba(168,85,247,0.7)]" />
         </header>
 
         {/* HERO SECTION */}
-        <section className="text-center space-y-6">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white leading-[1.1]">
+        <section className="text-center space-y-4">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white leading-[1.1]">
             THINK <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">FAST.</span><br />
             ASK <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">SMART.</span><br />
             CREATE WITH <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">AI.</span>
           </h1>
           
-          <p className="text-base text-zinc-400 font-medium px-2">
+          <p className="text-sm text-zinc-400 font-medium px-2">
             Where knowledge, speed and artificial intelligence collide.
           </p>
           
           <Link href="/auth" className="block w-full">
-            <Button size="lg" className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] rounded-2xl">
+            <Button size="lg" className="w-full h-12 text-md bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] rounded-2xl">
               ENTER ARCADE
             </Button>
           </Link>
         </section>
 
         {/* FLOATING ROUNDS PREVIEW */}
-        <section className="relative h-48 w-full flex items-center justify-center perspective-1000">
+        <section className="relative h-32 w-full flex items-center justify-center perspective-1000 mt-2">
            <div className="absolute left-0 animate-[float_6s_ease-in-out_infinite] z-20">
              <MiniCard round="R1" icon={<Cpu className="w-5 h-5 text-secondary" />} />
            </div>
-           <div className="absolute z-30 scale-110">
-             <MiniCard round="R2" icon={<Search className="w-6 h-6 text-primary" />} />
+           <div className="absolute z-30 scale-100">
+             <MiniCard round="R2" icon={<Search className="w-5 h-5 text-primary" />} />
            </div>
            <div className="absolute right-0 animate-[float_7s_ease-in-out_infinite] z-10">
              <MiniCard round="FINAL" icon={<BrainCircuit className="w-5 h-5 text-pink-500" />} />

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,9 +28,20 @@ export default function CreateTeamPage() {
   const [createdCode, setCreatedCode] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       if (!u) { router.push("/auth"); return; }
       setUser(u);
+      
+      try {
+        const userSnap = await getDoc(doc(db, "users", u.uid));
+        if (userSnap.exists() && userSnap.data().teamId) {
+          router.push("/dashboard");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to check user team:", err);
+      }
+      
       setLoading(false);
     });
     return () => unsub();

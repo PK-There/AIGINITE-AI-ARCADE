@@ -13,6 +13,9 @@ interface HubViewProps {
   setTeamState: React.Dispatch<React.SetStateAction<TeamState>>;
   onLaunchGame: (playerId: PlayerId) => void;
   isCaptain?: boolean;
+  teamMembers?: string[];
+  teamMemberNames?: string[];
+  currentUserUid?: string | null;
 }
 
 const getPlayerIcon = (iconName: string, color: string) => {
@@ -38,6 +41,9 @@ export const HubView: React.FC<HubViewProps> = ({
   setTeamState,
   onLaunchGame,
   isCaptain = true,
+  teamMembers = [],
+  teamMemberNames = [],
+  currentUserUid = null,
 }) => {
   const [isEditingTeamName, setIsEditingTeamName] = useState(false);
   const [tempTeamName, setTempTeamName] = useState(teamState.teamName);
@@ -117,16 +123,9 @@ export const HubView: React.FC<HubViewProps> = ({
           Human<br /><span className="text-[#d9ff52]">vs</span><br />Machine.
         </h1>
         <p className="text-sm text-zinc-400 leading-relaxed max-w-xs">
-          Four operative slots. Team Captain controls the round execution. Click your active slot to launch the arena.
+          Each member is assigned a specific sub-game. Complete them sequentially to win!
         </p>
       </div>
-
-      {!isCaptain && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
-          <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0" />
-          <span>Only your Team Captain can officially start and manage Round 1. You are in spectate / view mode.</span>
-        </div>
-      )}
 
       {/* Stage cards */}
       <div className="space-y-3 animate-rise-2">
@@ -142,6 +141,13 @@ export const HubView: React.FC<HubViewProps> = ({
           const isCompleted = status === 'COMPLETED';
           const isActive    = status === 'ACTIVE';
           const isLocked    = status === 'LOCKED';
+
+          // Assign slot to team members in join order
+          const hasMembers = teamMembers.length > 0;
+          const assignedIndex = (pId - 1) % (hasMembers ? teamMembers.length : 1);
+          const assignedUid = hasMembers ? teamMembers[assignedIndex] : null;
+          const assignedName = hasMembers ? teamMemberNames[assignedIndex] || 'Teammate' : 'Captain';
+          const isAssignedToMe = currentUserUid ? currentUserUid === assignedUid : isCaptain;
 
           return (
             <div
@@ -183,6 +189,12 @@ export const HubView: React.FC<HubViewProps> = ({
                   </div>
                   <p className="font-bold text-sm text-white leading-tight mt-0.5">{info.title}</p>
                   <p className="font-mono-ui text-[9px] text-zinc-500 mt-0.5">{info.role}</p>
+                  
+                  {/* Assignment label */}
+                  <p className="font-mono-ui text-[9px] text-[#5de0ff] mt-0.5 font-bold">
+                    Assigned: {assignedName} {isAssignedToMe ? '(You)' : ''}
+                  </p>
+
                   {isCompleted && score && (
                     <p className="font-mono-ui text-[9px] text-[#6ff0bc] mt-0.5 font-bold">
                       +{score.finalSubgameScore.toLocaleString()} pts
@@ -196,11 +208,11 @@ export const HubView: React.FC<HubViewProps> = ({
                 {isActive && (
                   <button
                     onClick={() => onLaunchGame(pId)}
-                    disabled={!isCaptain}
+                    disabled={!isAssignedToMe}
                     className="w-full sm:w-auto flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-[#d9ff52] text-[#0d1117] font-mono-ui text-xs font-black uppercase tracking-widest hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#ff6f91] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
-                    Launch Arena
+                    {isAssignedToMe ? 'Launch Arena' : `Play as ${assignedName}`}
                   </button>
                 )}
                 {isCompleted && (

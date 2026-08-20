@@ -33,9 +33,20 @@ export default function JoinTeamPage() {
   const [loadingTeams, setLoadingTeams] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       if (!u) { router.push("/auth"); return; }
       setUser(u);
+      
+      try {
+        const userSnap = await getDoc(doc(db, "users", u.uid));
+        if (userSnap.exists() && userSnap.data().teamId) {
+          router.push("/dashboard");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to verify user team status:", err);
+      }
+      
       setLoading(false);
     });
     return () => unsub();
@@ -49,16 +60,18 @@ export default function JoinTeamPage() {
       try {
         const teamsRef = collection(db, "teams");
         const snap = await getDocs(teamsRef);
-        const list: TeamItem[] = snap.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.name || "Unnamed Team",
-            code: data.code || "",
-            members: data.members || [],
-            memberNames: data.memberNames || [],
-          };
-        });
+        const list: TeamItem[] = snap.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name || "Unnamed Team",
+              code: data.code || "",
+              members: data.members || [],
+              memberNames: data.memberNames || [],
+            };
+          })
+          .filter((t) => t.members.length > 0); // only show teams with at least 1 member
         setTeamsList(list);
       } catch (err) {
         console.error("Error fetching teams list:", err);

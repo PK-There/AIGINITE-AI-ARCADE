@@ -179,7 +179,7 @@ export const LeaderboardScreen: React.FC = () => {
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
           <button
             id="back-to-arcade-btn"
             type="button"
@@ -188,22 +188,6 @@ export const LeaderboardScreen: React.FC = () => {
           >
             <ArrowLeft className="w-4 h-4" />
             <span>BACK TO ARCADE</span>
-          </button>
-
-          <button
-            id="play-next-team-btn"
-            type="button"
-            onClick={() => {
-              // Cycle to next sample team or restart
-              const currentIndex = teamsList.findIndex(t => t.id === currentTeam.id);
-              const nextTeam = teamsList[(currentIndex + 1) % teamsList.length];
-              selectTeam(nextTeam);
-              restartGame();
-            }}
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-display font-black text-base sm:text-lg uppercase tracking-wider flex items-center gap-3 shadow-xl shadow-cyan-500/25 transition-all cursor-pointer"
-          >
-            <RotateCcw className="w-5 h-5" />
-            <span>NEXT TEAM / NEW ROUND</span>
           </button>
         </div>
 

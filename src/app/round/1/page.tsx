@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment, onSnapshot } from 'firebase/firestore';
 import {
   TeamState,
   PlayerId,
@@ -38,26 +38,20 @@ export default function Round1Page() {
   const [isMuted, setIsMuted] = useState(false);
   const [isCaptain, setIsCaptain] = useState(true); // Default true, resolved via Firestore
   const [userTeamId, setUserTeamId] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState<string[]>([]);
+  const [teamMemberNames, setTeamMemberNames] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
+      setCurrentUser(user);
       try {
         const userSnap = await getDoc(doc(db, 'users', user.uid));
         if (userSnap.exists()) {
           const tId = userSnap.data().teamId;
           if (tId) {
             setUserTeamId(tId);
-            const teamSnap = await getDoc(doc(db, 'teams', tId));
-            if (teamSnap.exists()) {
-              const data = teamSnap.data();
-              setIsCaptain(data.captainId === user.uid);
-              setTeamState(prev => ({
-                ...prev,
-                teamName: data.name || prev.teamName,
-                teamId: data.code || prev.teamId,
-              }));
-            }
           }
         }
       } catch (err) {
@@ -67,6 +61,42 @@ export default function Round1Page() {
     return () => unsub();
   }, []);
 
+  // Real-time Firestore Sync
+  useEffect(() => {
+    if (!userTeamId) return;
+
+    const unsubTeam = onSnapshot(doc(db, 'teams', userTeamId), async (teamSnap) => {
+      if (teamSnap.exists()) {
+        const data = teamSnap.data();
+        setTeamMembers(data.members || []);
+        setTeamMemberNames(data.memberNames || []);
+        setIsCaptain(data.captainId === auth.currentUser?.uid);
+
+        const dbRound1State = data.round1State;
+        if (dbRound1State) {
+          setTeamState(dbRound1State);
+        } else {
+          // Initialize in Firestore if it doesn't exist yet
+          const initialState = {
+            ...INITIAL_TEAM_STATE,
+            teamName: data.name || INITIAL_TEAM_STATE.teamName,
+            teamId: data.code || INITIAL_TEAM_STATE.teamId,
+            startTime: Date.now(),
+          };
+          try {
+            await updateDoc(doc(db, 'teams', userTeamId), {
+              round1State: initialState,
+            });
+          } catch (err) {
+            console.error('Failed to initialize round1State in Firestore:', err);
+          }
+        }
+      }
+    });
+
+    return () => unsubTeam();
+  }, [userTeamId]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(teamState));
@@ -75,36 +105,39 @@ export default function Round1Page() {
 
   const handleSubgameComplete = async (playerId: PlayerId, scoreData: PlayerScoreData) => {
     soundFx.playSuccessFanfare();
-    setTeamState((prev) => {
-      const nextPlayerId = (playerId < 4 ? playerId + 1 : 5) as PlayerId | 5;
-      const updatedPlayerStatus = { ...prev.playerStatus, [playerId]: 'COMPLETED' as const };
-      if (playerId < 4) {
-        updatedPlayerStatus[(playerId + 1) as PlayerId] = 'ACTIVE';
-      }
-      const updatedScores = { ...prev.playerScores, [playerId]: scoreData };
-      const newTotalScore = (Object.values(updatedScores) as PlayerScoreData[]).reduce(
-        (sum, s) => sum + (s?.finalSubgameScore || 0), 0
-      );
-      const newTotalTime = (Object.values(updatedScores) as PlayerScoreData[]).reduce(
-        (sum, s) => sum + (s?.completionTime || 0), 0
-      );
-      return {
-        ...prev,
-        playerStatus: updatedPlayerStatus,
-        playerScores: updatedScores,
-        teamScore: newTotalScore,
-        totalTime: newTotalTime,
-        currentStage: nextPlayerId,
-        isFinished: playerId === 4,
-      };
-    });
 
-    // Firestore score sync
+    const nextPlayerId = (playerId < 4 ? playerId + 1 : 5) as PlayerId | 5;
+    const updatedPlayerStatus = { ...teamState.playerStatus, [playerId]: 'COMPLETED' as const };
+    if (playerId < 4) {
+      updatedPlayerStatus[(playerId + 1) as PlayerId] = 'ACTIVE';
+    }
+    const updatedScores = { ...teamState.playerScores, [playerId]: scoreData };
+    const newTotalScore = (Object.values(updatedScores) as PlayerScoreData[]).reduce(
+      (sum, s) => sum + (s?.finalSubgameScore || 0), 0
+    );
+    const newTotalTime = (Object.values(updatedScores) as PlayerScoreData[]).reduce(
+      (sum, s) => sum + (s?.completionTime || 0), 0
+    );
+
+    const nextState: TeamState = {
+      ...teamState,
+      playerStatus: updatedPlayerStatus,
+      playerScores: updatedScores,
+      teamScore: newTotalScore,
+      totalTime: newTotalTime,
+      currentStage: nextPlayerId,
+      isFinished: playerId === 4,
+    };
+
+    setTeamState(nextState);
+
+    // Firestore score & state sync
     if (userTeamId) {
       try {
         await updateDoc(doc(db, 'teams', userTeamId), {
-          teamScore: increment(scoreData.finalSubgameScore),
-          totalTime: increment(scoreData.completionTime),
+          round1State: nextState,
+          teamScore: newTotalScore,
+          totalTime: newTotalTime,
         });
       } catch (err) {
         console.error('Firestore score sync failed:', err);
@@ -119,10 +152,28 @@ export default function Round1Page() {
     setActiveView(playerId);
   };
 
-  const handleResetAll = () => {
-    setTeamState({ ...INITIAL_TEAM_STATE, startTime: Date.now() });
+  const handleResetAll = async () => {
+    const initialState = {
+      ...INITIAL_TEAM_STATE,
+      teamName: teamState.teamName,
+      teamId: teamState.teamId,
+      startTime: Date.now(),
+    };
+    setTeamState(initialState);
     setActiveView('HUB');
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
+
+    if (userTeamId) {
+      try {
+        await updateDoc(doc(db, 'teams', userTeamId), {
+          round1State: initialState,
+          teamScore: 0,
+          totalTime: 0,
+        });
+      } catch (err) {
+        console.error('Firestore reset failed:', err);
+      }
+    }
     soundFx.playKeypress();
   };
 
@@ -166,6 +217,9 @@ export default function Round1Page() {
             setTeamState={setTeamState}
             onLaunchGame={handleLaunchGame}
             isCaptain={isCaptain}
+            teamMembers={teamMembers}
+            teamMemberNames={teamMemberNames}
+            currentUserUid={currentUser?.uid}
           />
         )}
         {activeView === 1 && (

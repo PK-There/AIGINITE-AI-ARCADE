@@ -108,18 +108,8 @@ export const IntroScreen: React.FC = () => {
               </div>
             </div>
 
-            {/* Switch Team Button */}
+            {/* Leaderboard Button */}
             <div className="flex items-center gap-2">
-              <button
-                id="toggle-team-selector-btn"
-                type="button"
-                onClick={() => setShowTeamSelector(!showTeamSelector)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold text-slate-200 transition-all cursor-pointer"
-              >
-                <Users className="w-3.5 h-3.5 inline mr-1 text-cyan-400" />
-                Change Team
-              </button>
-
               <button
                 id="view-leaderboard-intro-btn"
                 type="button"
@@ -131,38 +121,6 @@ export const IntroScreen: React.FC = () => {
               </button>
             </div>
           </div>
-
-          {/* Team Switcher Drawer */}
-          {showTeamSelector && (
-            <div className="p-4 rounded-2xl bg-slate-950 border border-cyan-500/40 space-y-3 animate-fade-in">
-              <div className="text-xs font-bold font-mono-code uppercase text-slate-400">
-                SELECT PARTICIPATING SQUAD:
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {teamsList.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => {
-                      selectTeam(t);
-                      setShowTeamSelector(false);
-                    }}
-                    className={`
-                      p-3 rounded-xl border text-left transition-all cursor-pointer
-                      ${
-                        t.id === team.id
-                          ? 'bg-cyan-950 border-cyan-400 text-white shadow-md'
-                          : 'bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-300'
-                      }
-                    `}
-                  >
-                    <div className="font-bold text-sm">{t.name}</div>
-                    <div className="text-[10px] text-slate-400 truncate">{t.college}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
         </div>
 
