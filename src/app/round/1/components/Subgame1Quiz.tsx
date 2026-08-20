@@ -34,9 +34,13 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
   const gameStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    // Pick 10 random questions out of the 200 questions bank
-    const shuffled = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random());
-    setQuestions(shuffled.slice(0, 10));
+    // Fisher-Yates shuffle for truly uniform randomization across the full question bank
+    const pool = [...QUIZ_QUESTIONS];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    setQuestions(pool.slice(0, 10));
   }, []);
 
   const currentQ: QuizQuestion = questions[currentIndex];

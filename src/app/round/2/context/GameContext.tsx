@@ -197,9 +197,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const startRound = useCallback(() => {
     soundEffects.playClick();
 
-    // Select 3 unique mystery entities randomly
-    const shuffled = [...MYSTERY_ENTITIES].sort(() => 0.5 - Math.random());
-    const chosenList = shuffled.slice(0, 3);
+    // Select 3 unique mystery entities with Fisher-Yates shuffle
+    const pool = [...MYSTERY_ENTITIES];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const chosenList = pool.slice(0, 3);
     setMysteryEntitiesList(chosenList);
     setCurrentEntityIndex(0);
     setSegmentScores([0, 0, 0]);

@@ -39,9 +39,13 @@ export const Subgame4RapidFire: React.FC<Subgame4RapidFireProps> = ({
   const gameStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    // Pick 10 random rapid fire challenges out of 200 questions bank
-    const shuffled = [...RAPID_FIRE_CHALLENGES].sort(() => 0.5 - Math.random());
-    setChallenges(shuffled.slice(0, 10));
+    // Fisher-Yates shuffle for truly uniform randomization
+    const pool = [...RAPID_FIRE_CHALLENGES];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    setChallenges(pool.slice(0, 10));
   }, []);
 
   const currentChallenge: RapidChallenge = challenges[currentIndex];

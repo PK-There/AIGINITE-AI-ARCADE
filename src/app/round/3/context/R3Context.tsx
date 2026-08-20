@@ -526,7 +526,12 @@ export function R3Provider({ children, isCaptain = false }: { children: ReactNod
     // Called once when leaderboard has determined top-6 finalists
     loadFinalists: (finalists) => {
       // Shuffle challenge pool to assign random challenge cards per team
-      const shuffledChallenges = [...CHALLENGE_POOL].sort(() => 0.5 - Math.random());
+      const challengePool = [...CHALLENGE_POOL];
+      for (let i = challengePool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [challengePool[i], challengePool[j]] = [challengePool[j], challengePool[i]];
+      }
+      const shuffledChallenges = challengePool;
       const teams: R3Team[] = finalists.map((f, idx) => ({
         id: f.id,
         name: f.name,

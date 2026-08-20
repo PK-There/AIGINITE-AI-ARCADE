@@ -35,8 +35,12 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
 
   // Pick 10 random scenarios on mount
   useEffect(() => {
-    const shuffled = [...DEEPFAKE_SCENARIOS].sort(() => 0.5 - Math.random());
-    setScenarios(shuffled.slice(0, 10));
+    const pool = [...DEEPFAKE_SCENARIOS];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    setScenarios(pool.slice(0, 10));
   }, []);
 
   if (scenarios.length === 0) {
