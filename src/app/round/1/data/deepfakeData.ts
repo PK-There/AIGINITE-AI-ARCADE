@@ -62,12 +62,12 @@ export const DEEPFAKE_SCENARIOS: DeepfakeItem[] = [
     "promptOrContext": "An image will be shown. Check if it's real or fake.",
     "singleImage": {
       "url": "/media/images/1.png",
-      "isAi": false,
+      "isAi": true,
       "label": "Inspection Photograph"
     },
-    "correctAnswer": false,
+    "correctAnswer": true,
     "forensicTells": [],
-    "detailedExplanation": "This is REAL - an realimage. AI image generators often struggle with creating large crowds without repeating patterns and can produce anatomical errors like extra fingers or distorted proportions. Real photographs maintain consistent perspective and unique individuals.\n\nDetection Tip: Zoom in and check for repeated faces or patterns. Look for anatomical impossibilities like extra or missing fingers, asymmetrical eyes, or distorted body proportions. Check if the perspective and scale remain consistent throughout the image."
+    "detailedExplanation": "This is no a REAL image. AI image generators often struggle with creating large crowds without repeating patterns and can produce anatomical errors like extra fingers or distorted proportions. Real photographs maintain consistent perspective and unique individuals.\n\nDetection Tip: Zoom in and check for repeated faces or patterns. Look for anatomical impossibilities like extra or missing fingers, asymmetrical eyes, or distorted body proportions. Check if the perspective and scale remain consistent throughout the image."
   },
   {
     "id": "DF-04",
