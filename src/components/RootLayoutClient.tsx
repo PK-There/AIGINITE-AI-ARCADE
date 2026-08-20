@@ -1,11 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/BottomNav";
 
 export function RootLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isFullScreenPage = pathname.startsWith("/round/") || pathname === "/admin";
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
 
   // Full-screen pages (Rounds & Admin Portal) — no mobile container or bottom nav
   if (isFullScreenPage) {

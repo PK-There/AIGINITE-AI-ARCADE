@@ -47,7 +47,7 @@ export const IntroScreen: React.FC = () => {
           <div className="border-b border-slate-800 pb-4 text-center sm:text-left">
             <h2 className="font-display font-black text-xl sm:text-2xl text-white uppercase tracking-wide flex items-center justify-center sm:justify-start gap-2">
               <BrainCircuit className="w-6 h-6 text-cyan-400" />
-              YOUR MYSTERY IS HIDDEN
+              MY MYSTERY IS HIDDEN
             </h2>
             <p className="text-slate-300 text-sm sm:text-base mt-1 font-medium">
               "Ask the right questions. Don't waste them."

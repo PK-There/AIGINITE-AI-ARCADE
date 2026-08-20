@@ -10,12 +10,13 @@ export const FinalGuessCard: React.FC = () => {
   const [guessInput, setGuessInput] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
 
-  const questionsRemaining = Math.max(0, maxQuestions - questionHistory.length);
+  const elapsed = 120 - timeRemainingSec;
+  const cluesLocked = 5 - Math.min(5, Math.floor(elapsed / 20) + 1);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!guessInput.trim()) {
-      setErrorMsg('Please enter your mystery entity guess before submitting.');
+      setErrorMsg('Please enter my mystery entity guess before submitting.');
       return;
     }
 
@@ -37,10 +38,10 @@ export const FinalGuessCard: React.FC = () => {
             FINAL DECISION POINT
           </div>
           <h2 className="font-display font-black text-2xl sm:text-3xl text-white tracking-wide uppercase">
-            MAKE YOUR FINAL GUESS
+            MAKE MY FINAL GUESS
           </h2>
           <p className="font-sans font-medium text-slate-300 text-sm sm:text-base">
-            Who is the secret mystery entity?
+            Who is my secret mystery entity?
           </p>
         </div>
 
@@ -48,10 +49,10 @@ export const FinalGuessCard: React.FC = () => {
         <div className="flex items-center justify-between p-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-500/20 text-xs sm:text-sm">
           <div className="flex items-center gap-2 text-cyan-300 font-semibold">
             <Award className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-            <span>Fewer questions used = Higher competition score!</span>
+            <span>Fewer clues unlocked = Higher competition score!</span>
           </div>
-          <span className="font-mono-code text-xs text-slate-400 hidden sm:inline">
-            {questionsRemaining} Questions unused
+          <span className="font-mono-code text-xs text-slate-400 hidden sm:inline font-bold">
+            {cluesLocked} Clues locked
           </span>
         </div>
 
@@ -87,13 +88,13 @@ export const FinalGuessCard: React.FC = () => {
             className="w-full py-4 sm:py-5 px-8 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 font-display font-black text-lg sm:text-xl text-white tracking-wider uppercase flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/30 hover:scale-[1.01] transition-all cursor-pointer border border-cyan-300/40"
           >
             <Sparkles className="w-6 h-6 text-cyan-200" />
-            <span>SUBMIT FINAL GUESS</span>
+            <span>SUBMIT MY FINAL GUESS</span>
             <Send className="w-5 h-5" />
           </button>
         </form>
 
         <p className="text-center text-xs text-slate-500 font-mono-code">
-          Submitting final guess stops the clock and locks in your Round 2 ranking.
+          Submitting final guess stops the clock and locks in my Round 2 ranking.
         </p>
 
       </div>

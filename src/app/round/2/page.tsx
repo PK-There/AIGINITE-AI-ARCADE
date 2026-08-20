@@ -66,6 +66,11 @@ const GameContent: React.FC = () => {
   const { gameState, round2Active, isCaptain } = useGame();
   const { screen } = gameState;
 
+  // Reset scroll to top whenever Akinator stage shifts
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [screen]);
+
   // Real-time redirection listener
   React.useEffect(() => {
     const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {

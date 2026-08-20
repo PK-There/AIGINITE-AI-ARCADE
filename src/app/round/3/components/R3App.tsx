@@ -23,6 +23,11 @@ export function R3App({ finalists, myTeamId, userName }: Props) {
     setMyTeamId(myTeamId);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Reset scroll to top whenever the round 3 phase shifts
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [state.phase]);
+
   return (
     <div className="min-h-screen bg-[#0d1117] text-white flex flex-col">
       {/* Ticker ribbon */}

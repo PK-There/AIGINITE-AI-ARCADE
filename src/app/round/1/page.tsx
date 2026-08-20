@@ -85,6 +85,11 @@ export default function Round1Page() {
     return () => unsub();
   }, []);
 
+  // Reset scroll to top whenever the active view changes (subgames vs HUB)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [activeView]);
+
   // Real-time Firestore Sync
   useEffect(() => {
     if (!userTeamId) return;

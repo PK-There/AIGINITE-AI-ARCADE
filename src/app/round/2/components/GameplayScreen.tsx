@@ -30,17 +30,17 @@ export const GameplayScreen: React.FC = () => {
       {/* 2. MAIN BATTLE ARENA GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
-        {/* Left / Main Section (8 cols on lg): Questions & Final Guess */}
+        {/* Left / Main Section (8 cols on lg): Final Guess on top, Clues on bottom */}
         <div className="lg:col-span-8 space-y-8">
           
-          {/* Question Inquiries */}
-          <section className="p-6 sm:p-7 rounded-3xl border border-cyan-500/20 bg-slate-900/60 backdrop-blur-xl shadow-xl">
-            <QuestionGrid />
-          </section>
-
           {/* Final Guess Card */}
           <section>
             <FinalGuessCard />
+          </section>
+
+          {/* Question Inquiries / Clues */}
+          <section className="p-6 sm:p-7 rounded-3xl border border-cyan-500/20 bg-slate-900/60 backdrop-blur-xl shadow-xl">
+            <QuestionGrid />
           </section>
 
         </div>

@@ -314,7 +314,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isCorrect = matchResult.isCorrect;
     setGuessCorrect(isCorrect);
 
-    const questionsUsed = Math.max(1, questionHistory.length);
+    const elapsed = 120 - timeRemainingSec;
+    const questionsUsed = Math.min(5, Math.floor(elapsed / 20) + 1);
     const scoreResult = calculateRoundScore(isCorrect, questionsUsed, timeRemainingSec);
     setFinalScore(scoreResult.totalScore);
 

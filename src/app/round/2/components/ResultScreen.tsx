@@ -116,7 +116,7 @@ export const ResultScreen: React.FC = () => {
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">YOUR GUESS</span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">MY GUESS</span>
                 <div className="font-sans font-bold text-sm sm:text-base text-slate-200 truncate">
                   "{finalGuess || 'None'}"
                 </div>
