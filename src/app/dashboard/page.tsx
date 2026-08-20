@@ -69,6 +69,24 @@ export default function DashboardPage() {
     return () => unsubscribeAuth();
   }, [router]);
 
+  // Listen to activeRound globally for auto-redirects
+  useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
+      if (docSnap.exists()) {
+        const active = docSnap.data().activeRound || 0;
+        if (active === 1) {
+          router.push("/round/1");
+        } else if (active === 2) {
+          router.push("/round/2");
+        } else if (active === 3) {
+          router.push("/round/3");
+        }
+      }
+    });
+
+    return () => unsubSettings();
+  }, [router]);
+
   const handleSignOut = async () => {
     await signOut(auth);
     router.push("/");

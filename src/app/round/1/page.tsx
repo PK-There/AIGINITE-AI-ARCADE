@@ -18,6 +18,7 @@ import { Subgame2Wordle } from './components/Subgame2Wordle';
 import { Subgame3Deepfake } from './components/Subgame3Deepfake';
 import { Subgame4RapidFire } from './components/Subgame4RapidFire';
 import { VictoryView } from './components/VictoryView';
+import { LockKeyhole } from 'lucide-react';
 import { soundFx } from './utils/audio';
 
 const STORAGE_KEY = 'aignite_arcade_round1_v1';
@@ -41,6 +42,17 @@ export default function Round1Page() {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [teamMemberNames, setTeamMemberNames] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [activeRound, setActiveRound] = useState<number>(0);
+
+  // Listen to tournament settings (activeRound) in real-time
+  useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
+      if (docSnap.exists()) {
+        setActiveRound(docSnap.data().activeRound || 0);
+      }
+    });
+    return () => unsubSettings();
+  }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -102,6 +114,25 @@ export default function Round1Page() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(teamState));
     } catch {}
   }, [teamState]);
+
+  if (activeRound < 1) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] grid-lines flex flex-col items-center justify-center text-center px-6 gap-5 font-mono">
+        <div className="p-4 bg-zinc-900/60 border border-white/10 rounded-2xl">
+          <LockKeyhole className="w-10 h-10 text-amber-500 mx-auto animate-pulse" />
+        </div>
+        <h1 className="font-display text-4xl font-bold uppercase text-white text-shadow-pop">
+          ROUND 1 IS LOCKED
+        </h1>
+        <p className="text-sm text-zinc-400 max-w-xs leading-relaxed">
+          The simulation arena will unlock when the tournament organizer officially starts it. Please wait for the announcement.
+        </p>
+        <a href="/dashboard" className="font-mono-ui text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
+          ← Back to Dashboard
+        </a>
+      </div>
+    );
+  }
 
   const handleSubgameComplete = async (playerId: PlayerId, scoreData: PlayerScoreData) => {
     soundFx.playSuccessFanfare();

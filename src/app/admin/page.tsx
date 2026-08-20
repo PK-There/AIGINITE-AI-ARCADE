@@ -90,7 +90,7 @@ export default function AdminPage() {
   const [editUserName, setEditUserName] = useState("");
   const [editUserCollege, setEditUserCollege] = useState("");
   const [editUserTeamId, setEditUserTeamId] = useState("");
-  const [round2Active, setRound2Active] = useState(false);
+  const [activeRound, setActiveRound] = useState(0);
   const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
@@ -141,7 +141,7 @@ export default function AdminPage() {
 
     const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
       if (docSnap.exists()) {
-        setRound2Active(!!docSnap.data().round2Active);
+        setActiveRound(docSnap.data().activeRound || 0);
       }
     });
 
@@ -341,16 +341,19 @@ export default function AdminPage() {
     }
   };
 
-  // Toggle Round 2 globally active state
-  const handleToggleRound2 = async () => {
+  // Set the globally active round phase
+  const handleSetActiveRound = async (roundNum: number) => {
     try {
       await setDoc(doc(db, "settings", "tournament"), {
-        round2Active: !round2Active,
+        activeRound: roundNum,
+        round1Active: roundNum >= 1,
+        round2Active: roundNum >= 2,
+        round3Active: roundNum >= 3,
       }, { merge: true });
       soundFx.playCorrect();
     } catch (err) {
-      console.error("Failed to toggle Round 2 active state:", err);
-      alert("Error toggling Round 2: " + (err as Error).message);
+      console.error("Failed to set active round:", err);
+      alert("Error setting active round: " + (err as Error).message);
     }
   };
 
@@ -560,22 +563,55 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Round 2 Access Control Toggle */}
-        <div className="flex items-center gap-2 bg-zinc-950/60 border border-white/5 p-1 rounded-xl">
-          <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider px-2">
-            Round 2: {round2Active ? "⚡ ACTIVE" : "🔒 LOCKED"}
+        {/* Tournament Phase Controller */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-950/80 border border-[#00F0FF]/15 rounded-xl">
+          <span className="text-[9px] text-[#00F0FF] font-mono uppercase tracking-widest px-2">
+            Phase: <strong className="text-white">{activeRound === 0 ? "LOBBY" : `ROUND 0${activeRound}`}</strong>
           </span>
-          <Button
-            size="sm"
-            onClick={handleToggleRound2}
-            className={`h-7 px-3 text-[9px] font-bold font-mono uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
-              round2Active
-                ? "bg-amber-950/40 border-amber-500/30 text-amber-400 hover:bg-amber-600 hover:text-white"
-                : "bg-[#00F0FF]/10 border-[#00F0FF]/30 text-[#00F0FF] hover:bg-[#00F0FF]/25"
+          
+          <button
+            onClick={() => handleSetActiveRound(0)}
+            className={`px-2 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider border cursor-pointer transition-all ${
+              activeRound === 0
+                ? "bg-zinc-800 border-zinc-600 text-white"
+                : "bg-transparent border-transparent text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            {round2Active ? "LOCK ROUND 2" : "START ROUND 2"}
-          </Button>
+            Lobby
+          </button>
+          
+          <button
+            onClick={() => handleSetActiveRound(1)}
+            className={`px-2 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider border cursor-pointer transition-all ${
+              activeRound === 1
+                ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"
+                : "bg-transparent border-transparent text-zinc-500 hover:text-cyan-400"
+            }`}
+          >
+            Round 1
+          </button>
+
+          <button
+            onClick={() => handleSetActiveRound(2)}
+            className={`px-2 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider border cursor-pointer transition-all ${
+              activeRound === 2
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                : "bg-transparent border-transparent text-zinc-500 hover:text-amber-400"
+            }`}
+          >
+            Round 2
+          </button>
+
+          <button
+            onClick={() => handleSetActiveRound(3)}
+            className={`px-2 py-1 rounded-lg text-[9px] font-bold font-mono uppercase tracking-wider border cursor-pointer transition-all ${
+              activeRound === 3
+                ? "bg-pink-500/10 border-pink-500/30 text-pink-400"
+                : "bg-transparent border-transparent text-zinc-500 hover:text-pink-400"
+            }`}
+          >
+            Round 3
+          </button>
         </div>
 
         <Link href="/dashboard">
@@ -616,14 +652,14 @@ export default function AdminPage() {
             <Trophy className="w-8 h-8 text-[#FFB800]/60 shrink-0" />
           </Card>
 
-          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg border-amber-500/10">
+          <Card className="bg-zinc-950/60 border-white/5 p-4 rounded-xl flex items-center justify-between shadow-lg border-[#00F0FF]/10">
             <div>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Round 2 Gate</p>
-              <h3 className={`text-xl font-black mt-1 ${round2Active ? "text-emerald-400" : "text-amber-500"}`}>
-                {round2Active ? "ACTIVE" : "LOCKED"}
+              <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Active Phase</p>
+              <h3 className="text-xl font-black mt-1 text-[#00F0FF]">
+                {activeRound === 0 ? "LOBBY" : `ROUND 0${activeRound}`}
               </h3>
             </div>
-            <Lock className="w-8 h-8 text-amber-500/60 shrink-0" />
+            <Lock className="w-8 h-8 text-[#00F0FF]/60 shrink-0" />
           </Card>
         </div>
 

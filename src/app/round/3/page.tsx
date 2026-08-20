@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, orderBy, query, limit, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, limit, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { Loader2, LockKeyhole, Trophy } from "lucide-react";
 import { R3Provider } from "./context/R3Context";
 import { R3App } from "./components/R3App";
@@ -16,6 +16,17 @@ export default function Round3Page() {
   const [myTeamId, setMyTeamId] = useState<string | null>(null);
   const [isCaptain, setIsCaptain] = useState(false);
   const [userName, setUserName] = useState("");
+  const [activeRound, setActiveRound] = useState<number>(0);
+
+  // Listen to tournament settings (activeRound) in real-time
+  useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
+      if (docSnap.exists()) {
+        setActiveRound(docSnap.data().activeRound || 0);
+      }
+    });
+    return () => unsubSettings();
+  }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -105,6 +116,25 @@ export default function Round3Page() {
     return (
       <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-[#d9ff52] animate-spin" />
+      </div>
+    );
+  }
+
+  if (activeRound < 3) {
+    return (
+      <div className="min-h-screen bg-[#0d1117] grid-lines flex flex-col items-center justify-center text-center px-6 gap-5 font-mono">
+        <div className="p-4 bg-zinc-900/60 border border-white/10 rounded-2xl">
+          <LockKeyhole className="w-10 h-10 text-amber-500 mx-auto animate-pulse" />
+        </div>
+        <h1 className="font-display text-4xl font-bold uppercase text-white text-shadow-pop">
+          ROUND 3 IS LOCKED
+        </h1>
+        <p className="text-sm text-zinc-400 max-w-xs leading-relaxed">
+          The Final Round will unlock when the tournament organizer officially starts it. Please wait for the announcement.
+        </p>
+        <a href="/dashboard" className="font-mono-ui text-[11px] uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">
+          ← Back to Dashboard
+        </a>
       </div>
     );
   }
