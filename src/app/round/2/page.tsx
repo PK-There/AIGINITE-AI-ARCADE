@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { GameProvider, useGame } from './context/GameContext';
 import { Header } from './components/Header';
 import { IntroScreen } from './components/IntroScreen';
@@ -59,8 +62,26 @@ function Round2LockedScreen({ reason }: { reason: 'admin' | 'captain' }) {
 }
 
 const GameContent: React.FC = () => {
+  const router = useRouter();
   const { gameState, round2Active, isCaptain } = useGame();
   const { screen } = gameState;
+
+  // Real-time redirection listener
+  React.useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
+      if (docSnap.exists()) {
+        const active = docSnap.data().activeRound || 0;
+        if (active === 1) {
+          router.push("/round/1");
+        } else if (active === 3) {
+          router.push("/round/3");
+        } else if (active === 0) {
+          router.push("/dashboard");
+        }
+      }
+    });
+    return () => unsubSettings();
+  }, [router]);
 
   if (!round2Active) {
     return <Round2LockedScreen reason="admin" />;

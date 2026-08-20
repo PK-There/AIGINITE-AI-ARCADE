@@ -22,11 +22,21 @@ export default function Round3Page() {
   useEffect(() => {
     const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
       if (docSnap.exists()) {
-        setActiveRound(docSnap.data().activeRound || 0);
+        const active = docSnap.data().activeRound || 0;
+        setActiveRound(active);
+
+        // Auto-redirect to new round if host shifts phase
+        if (active === 1) {
+          router.push("/round/1");
+        } else if (active === 2) {
+          router.push("/round/2");
+        } else if (active === 0) {
+          router.push("/dashboard");
+        }
       }
     });
     return () => unsubSettings();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {

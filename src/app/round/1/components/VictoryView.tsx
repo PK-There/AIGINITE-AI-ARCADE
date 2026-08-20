@@ -1,6 +1,8 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { 
   Trophy, 
   Award, 
@@ -35,6 +37,20 @@ export const VictoryView: React.FC<VictoryViewProps> = ({
 }) => {
   const [showRound2Modal, setShowRound2Modal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [realLeaderboard, setRealLeaderboard] = useState<{ id: string; name: string; score: number }[]>([]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'teams'), orderBy('teamScore', 'desc'), limit(5));
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map(d => ({
+        id: d.id,
+        name: d.data().name || 'Anonymous',
+        score: d.data().teamScore || 0
+      }));
+      setRealLeaderboard(list);
+    });
+    return () => unsub();
+  }, []);
 
   const rankInfo = calculateTournamentRank(teamState.teamScore, teamState.totalTime);
 
@@ -216,7 +232,6 @@ Verified on AIgnite Tournament Arena.`;
             </div>
           </div>
 
-          {/* Tournament Leaderboard Preview */}
           <div className="bg-[#00F0FF]/5 border border-[#00F0FF]/30 rounded-lg p-4 sm:p-5 space-y-3 text-left">
             <div className="flex items-center justify-between border-b border-[#00F0FF]/20 pb-2">
               <span className="text-xs font-bold text-[#FFB800] uppercase">
@@ -226,12 +241,12 @@ Verified on AIgnite Tournament Arena.`;
             </div>
 
             <div className="space-y-1.5">
-              {leaderboardList.slice(0, 5).map((team, idx) => {
-                const isCurrent = team.teamId === teamState.teamId;
+              {realLeaderboard.slice(0, 5).map((team, idx) => {
+                const isCurrent = team.id === teamState.teamId;
 
                 return (
                   <div
-                    key={team.teamId}
+                    key={team.id}
                     className={`p-2.5 rounded border flex items-center justify-between gap-3 text-xs ${
                       isCurrent
                         ? 'bg-[#00F0FF]/20 border-[#00F0FF] shadow-[0_0_10px_rgba(0,240,255,0.4)]'
@@ -242,20 +257,24 @@ Verified on AIgnite Tournament Arena.`;
                       <span className="w-5 h-5 rounded bg-black/50 flex items-center justify-center font-bold text-[10px]">
                         #{idx + 1}
                       </span>
-                      <span className="font-bold text-slate-100">{team.teamName}</span>
+                      <span className="font-bold text-slate-100">{team.name}</span>
                       {isCurrent && (
-                        <span className="px-1 py-0.2 rounded bg-[#00F0FF] text-[#0B0F19] text-[9px] font-black">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#00F0FF]/20 text-[#00F0FF] font-mono-ui font-black uppercase">
                           YOU
                         </span>
                       )}
                     </div>
-
-                    <span className="font-black text-[#FFB800]">
-                      {team.totalScore.toLocaleString()} PTS
+                    <span className="font-bold font-mono text-[#00F0FF]">
+                      {team.score.toLocaleString()} PTS
                     </span>
                   </div>
                 );
               })}
+              {realLeaderboard.length === 0 && (
+                <div className="p-3 text-center text-xs text-zinc-500 font-mono italic">
+                  Waiting for teams to establish standings...
+                </div>
+              )}
             </div>
           </div>
         </div>

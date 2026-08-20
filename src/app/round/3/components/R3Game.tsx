@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { useR3, type Product, type ChallengeCard } from "../context/R3Context";
-import { Bot, LockKeyhole, Pause, Send, Sparkles, WandSparkles, Check } from "lucide-react";
+import { Bot, LockKeyhole, Pause, Send, Sparkles, WandSparkles, Check, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 
 function formatTime(s: number) {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
@@ -30,8 +33,20 @@ function ChallengeCards({ challenge, color }: { challenge: ChallengeCard[]; colo
 interface Props { myTeamId: string }
 
 export function R3Game({ myTeamId }: Props) {
+  const router = useRouter();
   const { state, myTeam, sendPrompt, updateProduct, submitTeam } = useR3();
   const [prompt, setPrompt] = useState("");
+  const [r3Image, setR3Image] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "teams", myTeamId), (snap) => {
+      if (snap.exists()) {
+        setR3Image(snap.data().r3Image || null);
+      }
+    });
+    return () => unsub();
+  }, [myTeamId]);
 
   if (!myTeam) return null;
 
@@ -41,6 +56,59 @@ export function R3Game({ myTeamId }: Props) {
     if (prompt.trim() && myTeam.promptsUsed < 10 && !isLocked) {
       sendPrompt(myTeamId, prompt);
       setPrompt("");
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 800 * 1024) {
+      alert("Mockup prototype image size must be less than 800KB. Please compress the file or upload a smaller one.");
+      return;
+    }
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      try {
+        await updateDoc(doc(db, "teams", myTeamId), {
+          r3Image: base64String,
+          r3Product: myTeam.product,
+        });
+        setR3Image(base64String);
+      } catch (err) {
+        console.error("Failed to upload mockup image:", err);
+        alert("Upload failed: " + (err as Error).message);
+      } finally {
+        setUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFinish = async () => {
+    if (!r3Image) {
+      alert("Please upload your product mockup image before submitting!");
+      return;
+    }
+
+    try {
+      // 1. Submit locally
+      submitTeam(myTeamId);
+
+      // 2. Persist to Firestore
+      await updateDoc(doc(db, "teams", myTeamId), {
+        r3Submitted: true,
+        r3Product: myTeam.product,
+      });
+
+      // 3. Forward to main standings
+      router.push("/leaderboard");
+    } catch (err) {
+      console.error("Failed to submit round 3:", err);
+      alert("Submission error: " + (err as Error).message);
     }
   };
 
@@ -191,6 +259,47 @@ export function R3Game({ myTeamId }: Props) {
           </div>
 
           <div className="space-y-4 p-5">
+            {/* Round 3 Image Uploader Card */}
+            <div className="border border-white/10 bg-black/40 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#d9ff52]" />
+                <span className="font-mono-ui text-[9px] font-bold uppercase tracking-[.16em] text-zinc-400">
+                  Prototype / Mockup Upload
+                </span>
+              </div>
+              
+              {r3Image ? (
+                <div className="space-y-2">
+                  <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 bg-zinc-950 flex items-center justify-center">
+                    <img src={r3Image} alt="Uploaded Prototype" className="max-h-full max-w-full object-contain" />
+                  </div>
+                  {!isLocked && (
+                    <label className="block text-center cursor-pointer py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-lg text-[10px] font-bold font-mono-ui uppercase tracking-wider text-zinc-400">
+                      Change Mockup File
+                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={uploading} />
+                    </label>
+                  )}
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center aspect-video rounded-lg border-2 border-dashed border-white/10 hover:border-[#d9ff52]/40 bg-zinc-950/60 cursor-pointer transition-colors p-4 text-center">
+                  {uploading ? (
+                    <Loader2 className="w-8 h-8 text-[#d9ff52] animate-spin" />
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-zinc-500 mb-2" />
+                      <span className="text-[10px] font-bold font-mono-ui uppercase tracking-widest text-zinc-400">
+                        Upload Prototype Mockup
+                      </span>
+                      <span className="text-[9px] text-zinc-600 mt-1 uppercase font-mono-ui">
+                        JPEG, PNG (Max 800KB)
+                      </span>
+                    </>
+                  )}
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={uploading} />
+                </label>
+              )}
+            </div>
+
             {(["name", "oneLiner", "audience", "features"] as (keyof Product)[]).map(field => (
               <label key={field} className="block">
                 <span className="mb-2 block font-mono-ui text-[9px] font-bold uppercase tracking-[.16em] text-zinc-500">
@@ -217,14 +326,14 @@ export function R3Game({ myTeamId }: Props) {
 
             <div className="border-t border-white/8 pt-4">
               <button
-                onClick={() => submitTeam(myTeamId)}
-                disabled={isLocked || state.phase !== "live"}
+                onClick={handleFinish}
+                disabled={isLocked || state.phase !== "live" || !r3Image || uploading}
                 className="w-full flex items-center justify-center gap-2 h-12 rounded-lg bg-[#d9ff52] text-[#0d1117] font-mono-ui text-xs uppercase tracking-widest font-black disabled:opacity-40 disabled:cursor-not-allowed hover:-translate-y-0.5 transition-transform hover:shadow-[4px_4px_0_#ff6f91]"
               >
-                {myTeam.submitted ? <><Check size={15} /> Submission locked</> : <><LockKeyhole size={15} /> Lock final submission</>}
+                {myTeam.submitted ? <><Check size={15} /> Submission locked</> : <><LockKeyhole size={15} /> Submit & View Standings</>}
               </button>
               <p className="mt-3 text-center font-mono-ui text-[9px] text-zinc-600 uppercase tracking-widest">
-                Lock only when your board says exactly what you mean.
+                Make sure your mockup image is uploaded and board is fully configured.
               </p>
             </div>
           </div>

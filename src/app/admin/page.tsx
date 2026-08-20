@@ -59,6 +59,8 @@ interface TeamData {
   totalTime?: number;
   status?: string;
   round1State?: any;
+  r3Image?: string;
+  r3Product?: any;
 }
 
 export default function AdminPage() {
@@ -92,6 +94,7 @@ export default function AdminPage() {
   const [editUserTeamId, setEditUserTeamId] = useState("");
   const [activeRound, setActiveRound] = useState(0);
   const [isDesktop, setIsDesktop] = useState(true);
+  const [selectedR3Submission, setSelectedR3Submission] = useState<any | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -696,6 +699,7 @@ export default function AdminPage() {
                         <th className="py-4 px-6 text-center">Invite Code</th>
                         <th className="py-4 px-6 text-center">Teammates</th>
                         <th className="py-4 px-6 text-center">R1 Stage</th>
+                        <th className="py-4 px-6 text-center">Round 3</th>
                         <th className="py-4 px-6 text-right">Score</th>
                         <th className="py-4 px-6 text-right">Time Taken</th>
                       </tr>
@@ -726,6 +730,21 @@ export default function AdminPage() {
                               Slot 0{team.round1State?.currentStage || 1}
                             </Badge>
                           </td>
+                          <td className="py-4 px-6 text-center">
+                            {team.r3Image ? (
+                              <Button
+                                size="sm"
+                                onClick={() => setSelectedR3Submission(team)}
+                                className="h-6 px-2.5 text-[8px] bg-pink-950/40 border border-pink-500/30 text-pink-400 hover:bg-pink-600 hover:text-white uppercase font-bold tracking-wider rounded-md cursor-pointer transition-all"
+                              >
+                                VIEW SUBMISSION
+                              </Button>
+                            ) : (
+                              <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider">
+                                No Upload
+                              </span>
+                            )}
+                          </td>
                           <td className="py-4 px-6 text-right font-black text-[#00F0FF]">
                             {team.teamScore || 0}
                           </td>
@@ -736,7 +755,7 @@ export default function AdminPage() {
                       ))}
                       {sortedLeaderboard.length === 0 && (
                         <tr>
-                          <td colSpan={7} className="text-center py-12 text-zinc-600 text-xs">
+                          <td colSpan={8} className="text-center py-12 text-zinc-600 text-xs">
                             No teams created in database.
                           </td>
                         </tr>
@@ -1106,6 +1125,85 @@ export default function AdminPage() {
           </div>
         )}
       </main>
+
+      {/* Round 3 Submission Lightbox Dialog */}
+      {selectedR3Submission && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-scale-in">
+            <div className="flex items-center justify-between border-b border-white/5 bg-zinc-900/40 px-6 py-4">
+              <div>
+                <h3 className="text-sm font-black text-[#00F0FF] uppercase tracking-wider">
+                  {selectedR3Submission.name} // Round 3 Submission
+                </h3>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">
+                  Live prototype presentation detail
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedR3Submission(null)}
+                className="p-1 rounded-lg border border-white/5 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+              {/* Image Rendering */}
+              {selectedR3Submission.r3Image ? (
+                <div className="space-y-1.5">
+                  <span className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest">Mockup / Prototype Screen</span>
+                  <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10 bg-zinc-900 flex items-center justify-center">
+                    <img src={selectedR3Submission.r3Image} alt="Prototype Mockup" className="max-h-full max-w-full object-contain" />
+                  </div>
+                </div>
+              ) : (
+                <div className="aspect-video rounded-xl border border-white/5 bg-zinc-900 flex items-center justify-center text-zinc-600 text-xs font-mono uppercase tracking-wider">
+                  No image uploaded
+                </div>
+              )}
+
+              {/* Product Board Details */}
+              {selectedR3Submission.r3Product ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2 bg-zinc-900/60 p-4 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-[#00F0FF] font-mono uppercase tracking-widest block mb-1">Product Name</span>
+                    <p className="text-sm font-black text-white uppercase">{selectedR3Submission.r3Product.name || "N/A"}</p>
+                  </div>
+
+                  <div className="col-span-2 bg-zinc-950/40 p-4 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-[#00F0FF] font-mono uppercase tracking-widest block mb-1">One-line Promise</span>
+                    <p className="text-xs text-zinc-200 leading-relaxed">{selectedR3Submission.r3Product.oneLiner || "N/A"}</p>
+                  </div>
+
+                  <div className="bg-zinc-950/40 p-4 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-[#00F0FF] font-mono uppercase tracking-widest block mb-1">Target Audience</span>
+                    <p className="text-xs text-zinc-200">{selectedR3Submission.r3Product.audience || "N/A"}</p>
+                  </div>
+
+                  <div className="bg-zinc-950/40 p-4 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-[#00F0FF] font-mono uppercase tracking-widest block mb-1">Three Proof Points</span>
+                    <p className="text-xs text-zinc-200 whitespace-pre-line leading-relaxed">{selectedR3Submission.r3Product.features || "N/A"}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 text-center text-xs text-zinc-600 border border-dashed border-white/5 rounded-xl uppercase tracking-wider font-mono">
+                  No product details shaped
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end border-t border-white/5 bg-zinc-900/40 px-6 py-4">
+              <Button
+                size="sm"
+                onClick={() => setSelectedR3Submission(null)}
+                className="bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-300 font-bold tracking-widest text-xs uppercase rounded-xl h-10 px-6 cursor-pointer"
+              >
+                Dismiss Panel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
