@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { useR3, type Product, type ChallengeCard } from "../context/R3Context";
-import { Bot, LockKeyhole, Pause, Send, Sparkles, WandSparkles, Check, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
+import { LockKeyhole, Pause, Sparkles, Check, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 
 function formatTime(s: number) {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
@@ -34,8 +34,7 @@ interface Props { myTeamId: string }
 
 export function R3Game({ myTeamId }: Props) {
   const router = useRouter();
-  const { state, myTeam, sendPrompt, updateProduct, submitTeam } = useR3();
-  const [prompt, setPrompt] = useState("");
+  const { state, myTeam, updateProduct, submitTeam } = useR3();
   const [r3Image, setR3Image] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -51,13 +50,6 @@ export function R3Game({ myTeamId }: Props) {
   if (!myTeam) return null;
 
   const isLocked = myTeam.submitted || state.phase === "ended";
-
-  const handleSend = () => {
-    if (prompt.trim() && myTeam.promptsUsed < 10 && !isLocked) {
-      sendPrompt(myTeamId, prompt);
-      setPrompt("");
-    }
-  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -150,16 +142,9 @@ export function R3Game({ myTeamId }: Props) {
         </div>
         <div className="flex items-center gap-5">
           <div className="text-right">
-            <p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-zinc-500">Time</p>
+            <p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-zinc-500">Time Remaining</p>
             <p className={`font-mono-ui text-2xl font-bold ${state.secondsRemaining < 60 ? "text-[#ff6f91]" : "text-white"}`}>
               {formatTime(state.secondsRemaining)}
-            </p>
-          </div>
-          <div className="w-px h-10 bg-white/10" />
-          <div className="text-right">
-            <p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-zinc-500">Prompts left</p>
-            <p className="font-mono-ui text-2xl font-bold text-[#d9ff52]">
-              {10 - myTeam.promptsUsed}<span className="text-zinc-600">/10</span>
             </p>
           </div>
         </div>
@@ -173,73 +158,8 @@ export function R3Game({ myTeamId }: Props) {
         <ChallengeCards challenge={myTeam.challenge} color={myTeam.color} />
       </div>
 
-      {/* Main two-column layout */}
-      <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-
-        {/* AI Co-pilot */}
-        <section className="border border-white/10 bg-white/[.04] rounded-xl overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-white/8 px-5 py-4">
-            <div className="flex items-center gap-3">
-              <Bot size={17} className="text-[#5de0ff]" />
-              <div>
-                <p className="text-sm font-bold text-white">Aignite Co-pilot</p>
-                <p className="font-mono-ui text-[9px] uppercase tracking-[.13em] text-zinc-500">Private AI session</p>
-              </div>
-            </div>
-            <span className="rounded-full bg-[#5de0ff]/10 px-3 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[.14em] text-[#5de0ff]">
-              Prompt {myTeam.promptsUsed}/10
-            </span>
-          </div>
-
-          <div className="flex min-h-[280px] flex-col p-5 flex-1">
-            {myTeam.history.length === 0 ? (
-              <div className="m-auto max-w-xs text-center">
-                <WandSparkles size={28} className="mx-auto text-[#d9ff52]" />
-                <p className="mt-4 font-display text-2xl font-bold uppercase text-white">What should we build first?</p>
-                <p className="mt-2 text-xs leading-6 text-zinc-500">Ask for a spark, a sharp critique, or a first draft. The AI knows your brief and your limitation.</p>
-              </div>
-            ) : (
-              <div className="space-y-4 overflow-y-auto max-h-64">
-                {myTeam.history.map((item, i) => (
-                  <div key={i} className="animate-rise">
-                    <p className="mb-2 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#d9ff52]">
-                      <span className="grid h-5 w-5 place-items-center rounded-full bg-[#d9ff52] text-[8px] text-[#0d1117] font-black">{i + 1}</span>
-                      Your prompt
-                    </p>
-                    <div className="ml-7 border-l border-[#d9ff52]/30 pl-4 text-sm leading-6 text-white">{item.prompt}</div>
-                    <div className="ml-7 mt-2 border-l border-[#5de0ff]/30 bg-white/[.03] p-4 rounded-r-lg text-sm leading-6 text-zinc-400">
-                      <span className="mb-1 block font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#5de0ff]">AI Response</span>
-                      {item.response}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-auto pt-5">
-              <div className="flex gap-2">
-                <input
-                  value={prompt}
-                  onChange={e => setPrompt(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
-                  disabled={isLocked || myTeam.promptsUsed >= 10}
-                  placeholder={isLocked ? "Submission locked" : "Ask the AI to push the idea…"}
-                  className="min-h-11 min-w-0 flex-1 border border-white/10 bg-[#0d1117] px-4 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-[#d9ff52]/50 rounded-lg"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={isLocked || myTeam.promptsUsed >= 10 || !prompt.trim()}
-                  className="shrink-0 px-4 bg-[#d9ff52] text-[#0d1117] rounded-lg font-bold disabled:opacity-40 hover:-translate-y-0.5 transition-transform"
-                >
-                  <Send size={15} />
-                </button>
-              </div>
-              <p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-zinc-600">
-                Every prompt is a move. Use them deliberately.
-              </p>
-            </div>
-          </div>
-        </section>
+      {/* Main layout centered */}
+      <div className="max-w-2xl mx-auto w-full">
 
         {/* Product Board */}
         <section className="border border-white/10 bg-white/[.04] rounded-xl overflow-hidden">

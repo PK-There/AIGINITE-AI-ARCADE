@@ -189,7 +189,7 @@ export default function Round3Page() {
   }
 
   return (
-    <R3Provider>
+    <R3Provider isCaptain={isCaptain}>
       <R3App finalists={finalists} myTeamId={myTeamId!} userName={userName} />
     </R3Provider>
   );

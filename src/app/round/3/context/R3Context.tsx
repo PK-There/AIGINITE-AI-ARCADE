@@ -127,7 +127,7 @@ const initialState: R3State = {
   myTeamId: null,
 };
 
-export function R3Provider({ children }: { children: ReactNode }) {
+export function R3Provider({ children, isCaptain = false }: { children: ReactNode; isCaptain?: boolean }) {
   const [state, setState] = useState<R3State>(initialState);
   const channel = useRef<BroadcastChannel | null>(null);
   const remoteUpdate = useRef(false);
@@ -162,16 +162,16 @@ export function R3Provider({ children }: { children: ReactNode }) {
     return () => clearTimeout(t);
   }, [state.countdown]);
 
-  // Timer tick
+  // Timer tick (runs strictly on captain/host tab to prevent double-tick storm across clients)
   useEffect(() => {
-    if (state.phase !== "live" || state.paused || state.countdown !== null) return;
+    if (!isCaptain || state.phase !== "live" || state.paused || state.countdown !== null) return;
     const id = setInterval(() =>
       setState(s => s.secondsRemaining > 0
         ? { ...s, secondsRemaining: s.secondsRemaining - 1 }
         : { ...s, phase: "ended", paused: false }
       ), 1000);
     return () => clearInterval(id);
-  }, [state.phase, state.paused, state.countdown]);
+  }, [state.phase, state.paused, state.countdown, isCaptain]);
 
   const value: R3ContextValue = {
     state,
@@ -181,7 +181,7 @@ export function R3Provider({ children }: { children: ReactNode }) {
       ...s, teams: s.teams.map(t => t.id === id ? { ...t, ready } : t),
     })),
     startEvent: () => setState(s =>
-      s.teams.length > 0 ? { ...s, countdown: 3, paused: false } : s
+      s.teams.length > 0 ? { ...s, phase: "live", countdown: null, paused: false } : s
     ),
     togglePause: () => setState(s => ({ ...s, paused: !s.paused })),
     endEvent: () => setState(s => ({ ...s, phase: "ended", paused: false, countdown: null })),
