@@ -133,16 +133,16 @@ Verified on AIgnite Tournament Arena.`;
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <button
+            <a
+              href="/round/2"
               onClick={() => {
-                soundFx.playLock();
-                setShowRound2Modal(true);
+                soundFx.playCorrect();
               }}
               className="bg-[#00F0FF] text-[#0B0F19] px-6 py-3 text-xs font-black shadow-[0_0_20px_rgba(0,240,255,0.6)] uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <Lock className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 stroke-[3]" />
               [ PROCEED TO ROUND 2 ]
-            </button>
+            </a>
 
             <button
               onClick={handleCopyScoreCard}

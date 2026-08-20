@@ -10,9 +10,55 @@ import { ResultScreen } from './components/ResultScreen';
 import { RoundCompleteScreen } from './components/RoundCompleteScreen';
 import { LeaderboardScreen } from './components/LeaderboardScreen';
 
+import { Lock, ShieldAlert } from 'lucide-react';
+
+function Round2LockedScreen() {
+  return (
+    <div className="min-h-screen bg-[#0d1117] text-white flex flex-col justify-center items-center p-6 font-mono relative overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(168,85,247,0.12),transparent)]" />
+      
+      <div className="max-w-md w-full rounded-2xl bg-zinc-950 border-2 border-amber-500/30 p-8 space-y-6 shadow-[0_0_40px_rgba(245,158,11,0.15)] text-center relative z-10">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+          <Lock className="w-8 h-8 animate-pulse" />
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-black text-slate-100 uppercase tracking-widest">
+            ROUND 2 IS CURRENTLY LOCKED
+          </h2>
+          <p className="text-sm text-amber-500/80 font-medium">
+            "Round 2 will unlock when the tournament organizer officially starts it."
+          </p>
+        </div>
+
+        <div className="bg-zinc-900/60 p-4 rounded-xl border border-white/5 space-y-2">
+          <div className="flex items-center gap-2 text-xs text-zinc-400 justify-center">
+            <ShieldAlert className="w-4 h-4 text-amber-500" />
+            <span>STANDBY MODE ACTIVE</span>
+          </div>
+          <p className="text-[10px] text-zinc-500 uppercase leading-relaxed">
+            Please wait for the live announcement. The screen will automatically refresh and unlock when the round begins.
+          </p>
+        </div>
+
+        <a 
+          href="/dashboard"
+          className="block w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-xs uppercase tracking-widest rounded-xl border border-white/5 transition-all"
+        >
+          Return to Hub
+        </a>
+      </div>
+    </div>
+  );
+}
+
 const GameContent: React.FC = () => {
-  const { gameState } = useGame();
+  const { gameState, round2Active } = useGame();
   const { screen } = gameState;
+
+  if (!round2Active) {
+    return <Round2LockedScreen />;
+  }
 
   return (
     <div className="relative min-h-screen bg-[#0d1117] text-white flex flex-col font-mono selection:bg-[#d9ff52]/30 selection:text-[#d9ff52]">

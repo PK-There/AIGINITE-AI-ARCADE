@@ -89,6 +89,7 @@ export default function AdminPage() {
   const [editUserName, setEditUserName] = useState("");
   const [editUserCollege, setEditUserCollege] = useState("");
   const [editUserTeamId, setEditUserTeamId] = useState("");
+  const [round2Active, setRound2Active] = useState(false);
 
   // Monitor auth state and check if user has admin privileges
   useEffect(() => {
@@ -127,9 +128,16 @@ export default function AdminPage() {
       setUsers(list);
     });
 
+    const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
+      if (docSnap.exists()) {
+        setRound2Active(!!docSnap.data().round2Active);
+      }
+    });
+
     return () => {
       unsubTeams();
       unsubUsers();
+      unsubSettings();
     };
   }, [isAdmin]);
 
@@ -322,6 +330,19 @@ export default function AdminPage() {
     }
   };
 
+  // Toggle Round 2 globally active state
+  const handleToggleRound2 = async () => {
+    try {
+      await setDoc(doc(db, "settings", "tournament"), {
+        round2Active: !round2Active,
+      }, { merge: true });
+      soundFx.playCorrect();
+    } catch (err) {
+      console.error("Failed to toggle Round 2 active state:", err);
+      alert("Error toggling Round 2: " + (err as Error).message);
+    }
+  };
+
   // Delete User completely
   const handleDeleteUser = async (uid: string) => {
     if (!window.confirm("PERMANENTLY DELETE User profile from database?")) return;
@@ -490,6 +511,24 @@ export default function AdminPage() {
             <Zap className="w-3.5 h-3.5 inline mr-1" />
             Players ({users.length})
           </button>
+        </div>
+
+        {/* Round 2 Access Control Toggle */}
+        <div className="flex items-center gap-2 bg-zinc-950/60 border border-white/5 p-1 rounded-xl">
+          <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-wider px-2">
+            Round 2: {round2Active ? "⚡ ACTIVE" : "🔒 LOCKED"}
+          </span>
+          <Button
+            size="sm"
+            onClick={handleToggleRound2}
+            className={`h-7 px-3 text-[9px] font-bold font-mono uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
+              round2Active
+                ? "bg-amber-950/40 border-amber-500/30 text-amber-400 hover:bg-amber-600 hover:text-white"
+                : "bg-[#00F0FF]/10 border-[#00F0FF]/30 text-[#00F0FF] hover:bg-[#00F0FF]/25"
+            }`}
+          >
+            {round2Active ? "LOCK ROUND 2" : "START ROUND 2"}
+          </Button>
         </div>
 
         <Link href="/dashboard">

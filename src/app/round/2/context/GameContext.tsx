@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import confetti from 'canvas-confetti';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, getDocs, collection, query, orderBy, limit, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, orderBy, limit, updateDoc, increment, onSnapshot } from 'firebase/firestore';
 import { 
   GameState, 
   GameScreen, 
@@ -35,6 +35,7 @@ interface GameContextType {
   restartGame: () => void;
   toggleSound: () => void;
   assignedEntityOverride: (entityId: string) => void;
+  round2Active: boolean;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -58,8 +59,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [finalScore, setFinalScore] = useState<number>(0);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [round2Active, setRound2Active] = useState<boolean>(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Listen to tournament settings (Round 2 Lock) in real-time
+  useEffect(() => {
+    const unsubSettings = onSnapshot(doc(db, "settings", "tournament"), (docSnap) => {
+      if (docSnap.exists()) {
+        setRound2Active(!!docSnap.data().round2Active);
+      } else {
+        setRound2Active(false);
+      }
+    });
+    return () => unsubSettings();
+  }, []);
 
   // Fetch real user & team info + dynamic leaderboard from Firestore
   useEffect(() => {
@@ -392,6 +406,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         restartGame,
         toggleSound,
         assignedEntityOverride,
+        round2Active,
       }}
     >
       {children}
