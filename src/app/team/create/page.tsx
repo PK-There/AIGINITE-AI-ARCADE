@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Copy, Check, Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { soundFx } from "@/app/round/1/utils/audio";
 
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
