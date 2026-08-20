@@ -63,16 +63,7 @@ export const HubView: React.FC<HubViewProps> = ({
   return (
     <div className="w-full space-y-5 pb-8">
 
-      {/* Ticker ribbon */}
-      <div className="overflow-hidden border-b border-white/5 py-2 font-mono-ui text-[9px] uppercase tracking-[.2em] text-zinc-600">
-        <div className="ticker-track flex w-max gap-10 whitespace-nowrap">
-          <span>AIGNITE AI ARCADE / ROUND 01</span>
-          <span>HUMAN VS MACHINE / 4 OPERATIVE SLOTS</span>
-          <span>SEQUENTIAL UNLOCK PROTOCOL</span>
-          <span>AIGNITE AI ARCADE / ROUND 01</span>
-          <span>HUMAN VS MACHINE / 4 OPERATIVE SLOTS</span>
-        </div>
-      </div>
+
 
       {/* Mission header */}
       <div className="animate-rise space-y-1 px-1">
