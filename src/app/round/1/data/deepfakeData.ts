@@ -125,7 +125,7 @@ export const DEEPFAKE_SCENARIOS: DeepfakeItem[] = [
     },
     "correctAnswer": true,
     "forensicTells": [],
-    "detailedExplanation": "This is a FAKE photograph taken by a professional photographer. The image shows an authentic scene with natural lighting, realistic textures, and consistent perspective. There are no signs of digital manipulation or AI generation.\n\nDetection Tip: Authentic photographs typically have natural lighting, realistic textures, and consistent depth of field. Look for realistic details like natural shadows, realistic skin textures, and consistent reflections."
+    "detailedExplanation": "This is a FAKE photograph taken by a professional photographer. The image shows an authentic scene with natural lighting, realistic textures, and consistent perspective. There are signs of digital manipulation or AI generation.\n\nDetection Tip: Authentic photographs typically have natural lighting, realistic textures, and consistent depth of field. Look for realistic details like natural shadows, realistic skin textures, and consistent reflections."
   },
   {
     "id": "DF-08",
@@ -279,12 +279,12 @@ export const DEEPFAKE_SCENARIOS: DeepfakeItem[] = [
     "promptOrContext": "A brief recording will played. Decide if the video is real or fake.",
     "singleImage": {
       "url": "/media/videos/fake5.mp4",
-      "isAi": true,
+      "isAi": false,
       "label": "Video Evidence Clip"
     },
-    "correctAnswer": true,
+    "correctAnswer": false,
     "forensicTells": [],
-    "detailedExplanation": "This is a FAKE video. Cloning apps can easily fabricate statements. Such admissions, if true, would be instantly investigated and reported in the press.\n\nDetection Tip: Search for evidence in established business news and legal filings—ignore isolated clips unless supported by the news."
+    "detailedExplanation": "This is a REAL video."
   },
   {
     "id": "DF-19",
@@ -582,12 +582,12 @@ export const DEEPFAKE_SCENARIOS: DeepfakeItem[] = [
     "promptOrContext": "An image featuring a new urban architectural project is presented. Verify its authenticity.",
     "singleImage": {
       "url": "/media/images/fake10.png",
-      "isAi": true,
+      "isAi": false,
       "label": "Inspection Photograph"
     },
-    "correctAnswer": true,
+    "correctAnswer": false,
     "forensicTells": [],
-    "detailedExplanation": "Signs of AI generation include inconsistent shadows, odd proportions, and missing fine architectural details. Genuine images of urban projects are usually published by the developers or city authorities.\n\nDetection Tip: Compare images with official releases from architects or municipal websites."
+    "detailedExplanation": "Signs of NO AI generation are visible in the image. Genuine images of urban projects are usually published by the developers or city authorities."
   },
   {
     "id": "DF-40",
