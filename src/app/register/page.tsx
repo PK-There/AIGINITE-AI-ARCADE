@@ -17,7 +17,6 @@ export default function RegisterPage() {
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [displayName, setDisplayName] = useState("");
-  const [college, setCollege] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -72,7 +71,6 @@ export default function RegisterPage() {
         displayName: displayName.trim(),
         email: user.email,
         photoURL: user.photoURL,
-        college: college.trim(),
         createdAt: new Date().toISOString(),
         teamId: null,
       });
@@ -139,18 +137,6 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-zinc-300 uppercase tracking-widest">
-                  College / Department <span className="text-zinc-500 normal-case font-normal">(optional)</span>
-                </Label>
-                <Input
-                  value={college}
-                  onChange={(e) => setCollege(e.target.value)}
-                  placeholder="e.g. Computer Engineering"
-                  className="bg-zinc-800/60 border-white/10 text-white placeholder:text-zinc-500 h-11 rounded-xl"
-                  maxLength={60}
-                />
-              </div>
 
               {error && (
                 <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 text-center">
