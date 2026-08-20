@@ -177,19 +177,17 @@ export default function AdminPage() {
   const handleKickMember = async (team: TeamData, memberUid: string) => {
     if (!window.confirm("Are you sure you want to kick this teammate?")) return;
     try {
+      const memberIndex = team.members.indexOf(memberUid);
+      if (memberIndex === -1) return;
+
       const updatedMembers = team.members.filter((m) => m !== memberUid);
-      
-      const updatedNames: string[] = [];
-      for (const uid of updatedMembers) {
-        const uSnap = await getDoc(doc(db, "users", uid));
-        if (uSnap.exists()) {
-          updatedNames.push(uSnap.data().displayName || uSnap.data().email || "Teammate");
-        }
-      }
+      const updatedNames = (team.memberNames || []).filter((_, idx) => idx !== memberIndex);
+      const newCaptainId = team.captainId === memberUid ? (updatedMembers[0] || "") : team.captainId;
 
       await updateDoc(doc(db, "teams", team.id), {
         members: updatedMembers,
         memberNames: updatedNames,
+        captainId: newCaptainId,
       });
 
       await updateDoc(doc(db, "users", memberUid), {
@@ -199,6 +197,7 @@ export default function AdminPage() {
       soundFx.playCorrect();
     } catch (err) {
       console.error("Failed to kick member:", err);
+      alert("Failed to kick member: " + (err as Error).message);
     }
   };
 
@@ -253,6 +252,50 @@ export default function AdminPage() {
       soundFx.playWrong();
     } catch (err) {
       console.error("Failed to delete team:", err);
+    }
+  };
+
+  // Reset ALL Teams in the tournament
+  const handleResetAllTeams = async () => {
+    if (!window.confirm("WARNING: Are you sure you want to reset ALL teams in the tournament? This will clear all scores, times, and round progress states for every team.")) return;
+    if (!window.confirm("DOUBLE CONFIRMATION: This is irreversible. Clear all tournament standings?")) return;
+
+    try {
+      for (const team of teams) {
+        const resetState = {
+          teamName: team.name,
+          teamId: team.code,
+          currentStage: 1,
+          teamScore: 0,
+          totalTime: 0,
+          playerStatus: {
+            1: "ACTIVE",
+            2: "LOCKED",
+            3: "LOCKED",
+            4: "LOCKED",
+          },
+          playerScores: {
+            1: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
+            2: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
+            3: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
+            4: { playerScore: 0, correctAnswers: 0, wrongAnswers: 0, completionTime: 0, speedBonus: 0, finalSubgameScore: 0 },
+          },
+          startTime: Date.now(),
+          isFinished: false,
+        };
+
+        await updateDoc(doc(db, "teams", team.id), {
+          round1State: resetState,
+          teamScore: 0,
+          totalTime: 0,
+          status: "READY",
+        });
+      }
+      soundFx.playCorrect();
+      alert("All teams successfully reset to initial states!");
+    } catch (err) {
+      console.error("Failed to reset all teams:", err);
+      alert("Error resetting tournament: " + (err as Error).message);
     }
   };
 
@@ -478,13 +521,24 @@ export default function AdminPage() {
         {activeTab === "leaderboard" && (
           <div className="space-y-6">
             <Card className="bg-zinc-950 border-white/5 shadow-2xl rounded-2xl">
-              <CardHeader className="border-b border-white/5">
-                <CardTitle className="text-md font-bold tracking-widest text-[#00F0FF] uppercase flex items-center gap-2">
-                  <Trophy className="text-yellow-500 w-5 h-5" /> Live Ranking Standings
-                </CardTitle>
-                <CardDescription className="text-zinc-500 text-xs">
-                  Updated in real-time as participants complete rounds and score points.
-                </CardDescription>
+              <CardHeader className="border-b border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <CardTitle className="text-md font-bold tracking-widest text-[#00F0FF] uppercase flex items-center gap-2">
+                    <Trophy className="text-yellow-500 w-5 h-5" /> Live Ranking Standings
+                  </CardTitle>
+                  <CardDescription className="text-zinc-500 text-xs mt-0.5">
+                    Updated in real-time as participants complete rounds and score points.
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleResetAllTeams}
+                  className="bg-red-950/40 border border-red-500/30 text-red-400 hover:bg-red-600 hover:text-white text-[10px] font-bold tracking-wider rounded-lg h-9 uppercase shrink-0"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                  RESET ALL TEAMS
+                </Button>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">

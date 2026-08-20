@@ -101,17 +101,22 @@ export default function JoinTeamPage() {
         return;
       }
 
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      const displayName = userSnap.exists() 
+        ? userSnap.data().displayName 
+        : (user.displayName || user.email || "Player");
+
       const teamDocRef = doc(db, "teams", teamId);
       await updateDoc(teamDocRef, {
         members: [...(teamData.members || []), user.uid],
-        memberNames: [...(teamData.memberNames || []), user.displayName || user.email],
+        memberNames: [...(teamData.memberNames || []), displayName],
       });
       await updateDoc(doc(db, "users", user.uid), { teamId });
 
       router.push("/dashboard");
     } catch (err: any) {
-      console.error(err);
-      setError("Failed to join team. Please try again.");
+      console.error("Failed to join team:", err);
+      setError(err?.message || "Failed to join team. Please try again.");
     } finally {
       setJoining(false);
     }
