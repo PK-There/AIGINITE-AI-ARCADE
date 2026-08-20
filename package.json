@@ -1,5 +1,5 @@
 {
-  "name": "aignite-ai-arcade",
+  "name": "tempapp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@hugeicons/core-free-icons": "^4.2.3",
-    "@hugeicons/react": "^1.1.9",
+    "@google/genai": "^2.17.1",
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "firebase": "^12.17.1",
     "lucide-react": "^1.33.0",
+    "motion": "^13.1.0",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -30,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

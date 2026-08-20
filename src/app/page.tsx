@@ -1,69 +1,148 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { BrainCircuit, Cpu, ShieldQuestion, Trophy, Zap, Search, Sparkles } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
+export default function MobileLandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="relative min-h-screen bg-background flex flex-col overflow-x-hidden pt-4 pb-8">
+      
+      {/* Background Effect */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(168,85,247,0.15),transparent)]"></div>
+
+      <main className="flex-1 relative z-10 w-full flex flex-col px-5 space-y-12">
+        
+        {/* HEADER / LOGO */}
+        <header className="flex justify-center pt-8 pb-2">
+          <img src="/AIGNITE%20LOGO.png" alt="Aignite Logo" className="h-36 drop-shadow-[0_0_35px_rgba(168,85,247,0.7)]" />
+        </header>
+
+        {/* HERO SECTION */}
+        <section className="text-center space-y-6">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white leading-[1.1]">
+            THINK <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">FAST.</span><br />
+            ASK <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">SMART.</span><br />
+            CREATE WITH <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">AI.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          
+          <p className="text-base text-zinc-400 font-medium px-2">
+            Where knowledge, speed and artificial intelligence collide.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          
+          <Link href="/auth" className="block w-full">
+            <Button size="lg" className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] rounded-2xl">
+              ENTER ARCADE
+            </Button>
+          </Link>
+        </section>
+
+        {/* FLOATING ROUNDS PREVIEW */}
+        <section className="relative h-48 w-full flex items-center justify-center perspective-1000">
+           <div className="absolute left-0 animate-[float_6s_ease-in-out_infinite] z-20">
+             <MiniCard round="R1" icon={<Cpu className="w-5 h-5 text-secondary" />} />
+           </div>
+           <div className="absolute z-30 scale-110">
+             <MiniCard round="R2" icon={<Search className="w-6 h-6 text-primary" />} />
+           </div>
+           <div className="absolute right-0 animate-[float_7s_ease-in-out_infinite] z-10">
+             <MiniCard round="FINAL" icon={<BrainCircuit className="w-5 h-5 text-pink-500" />} />
+           </div>
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/20 blur-[50px] rounded-full pointer-events-none"></div>
+        </section>
+
+        {/* COMPETITION CARDS */}
+        <section className="space-y-4">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-white tracking-tight">THREE ROUNDS.</h2>
+            <h2 className="text-2xl font-bold text-primary tracking-tight">ONE CHAMPION.</h2>
+          </div>
+
+          <MobileCard 
+            round="ROUND 01" 
+            title="HUMAN VS MACHINE" 
+            desc="Speed, knowledge, reflex and observation."
+            icon={<Zap className="w-6 h-6 text-secondary" />}
+            border="border-secondary/30"
+          />
+          <MobileCard 
+            round="ROUND 02" 
+            title="AI WHO AM I?" 
+            desc="Ask smart questions. Eliminate possibilities."
+            icon={<ShieldQuestion className="w-6 h-6 text-primary" />}
+            border="border-primary/30"
+          />
+          <MobileCard 
+            round="FINAL" 
+            title="10-PROMPT CHALLENGE" 
+            desc="Use AI to turn an idea into a product."
+            icon={<BrainCircuit className="w-6 h-6 text-pink-500" />}
+            border="border-pink-500/30"
+          />
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section className="bg-zinc-900/40 rounded-3xl p-6 border border-white/5 space-y-6">
+          <h2 className="text-xl font-bold text-center text-white mb-2">HOW IT WORKS</h2>
+          <div className="space-y-4">
+            <MobileStep num="1" title="Register" desc="Sign in with Google." />
+            <MobileStep num="2" title="Form Team" desc="Create or join a squad of 4." />
+            <MobileStep num="3" title="Compete" desc="Clear all 3 arcade rounds." />
+            <MobileStep num="4" title="Win" desc="Climb to the top rank." />
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="text-center py-8 space-y-4">
+          <h2 className="text-2xl font-bold text-white">YOUR SQUAD AWAITS</h2>
+          <p className="text-sm text-zinc-400">Join the arena before registration closes.</p>
+          <Link href="/auth" className="inline-block w-full">
+            <Button size="lg" variant="outline" className="w-full h-12 border-zinc-700 hover:bg-zinc-800 rounded-xl">
+              JOIN COMPETITION
+            </Button>
+          </Link>
+        </section>
+
       </main>
+    </div>
+  );
+}
+
+// Mobile specific subcomponents
+function MiniCard({ round, icon }: { round: string, icon: React.ReactNode }) {
+  return (
+    <div className="bg-zinc-900/90 backdrop-blur border border-white/10 p-3 rounded-xl shadow-xl flex flex-col items-center gap-1 w-20">
+      <span className="text-[10px] font-bold text-zinc-500">{round}</span>
+      {icon}
+    </div>
+  );
+}
+
+function MobileCard({ round, title, desc, icon, border }: { round: string, title: string, desc: string, icon: React.ReactNode, border: string }) {
+  return (
+    <div className={`bg-zinc-900/60 backdrop-blur border ${border} p-5 rounded-2xl flex gap-4 items-start`}>
+      <div className="p-3 bg-white/5 rounded-xl shrink-0">
+        {icon}
+      </div>
+      <div>
+        <div className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">{round}</div>
+        <h3 className="font-bold text-white text-lg leading-tight mt-1">{title}</h3>
+        <p className="text-xs text-zinc-400 mt-2 leading-relaxed">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function MobileStep({ num, title, desc }: { num: string, title: string, desc: string }) {
+  return (
+    <div className="flex gap-4 items-center">
+      <div className="w-10 h-10 rounded-full bg-primary/20 text-primary font-black flex items-center justify-center shrink-0 border border-primary/30">
+        {num}
+      </div>
+      <div>
+        <h4 className="font-bold text-white text-sm">{title}</h4>
+        <p className="text-xs text-zinc-400">{desc}</p>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,17 @@
+{
+  "name": "Aignite AI Arcade",
+  "short_name": "Aignite",
+  "description": "Think Fast. Ask Smart. Create with AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#a855f7",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
