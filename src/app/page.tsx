@@ -15,7 +15,7 @@ export default function MobileLandingPage() {
         
         {/* HEADER / LOGO */}
         <header className="flex justify-center pt-4 pb-0">
-          <img src="/AIGNITE%20LOGO.png" alt="Aignite Logo" className="h-28 drop-shadow-[0_0_35px_rgba(168,85,247,0.7)]" />
+          <img src="/AIGNITE%20LOGO.png" alt="Aignite Logo" className="h-44 drop-shadow-[0_0_40px_rgba(168,85,247,0.75)]" />
         </header>
 
         {/* HERO SECTION */}

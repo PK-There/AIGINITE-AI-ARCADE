@@ -29,6 +29,7 @@ import {
   Search,
   Zap,
   ArrowLeft,
+  MonitorOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -90,6 +91,16 @@ export default function AdminPage() {
   const [editUserCollege, setEditUserCollege] = useState("");
   const [editUserTeamId, setEditUserTeamId] = useState("");
   const [round2Active, setRound2Active] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Monitor auth state and check if user has admin privileges
   useEffect(() => {
@@ -371,6 +382,42 @@ export default function AdminPage() {
     setEditUserCollege(user.college || "");
     setEditUserTeamId(user.teamId || "none");
   };
+
+  if (!isDesktop) {
+    return (
+      <div className="min-h-screen bg-[#090D16] text-white flex flex-col justify-center items-center p-6 font-mono relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,240,255,0.12),transparent)]" />
+        
+        <div className="max-w-md w-full rounded-2xl bg-zinc-950 border-2 border-red-500/30 p-8 space-y-6 shadow-[0_0_40px_rgba(239,68,68,0.15)] text-center relative z-10">
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+            <MonitorOff className="w-8 h-8 animate-pulse" />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl font-black text-slate-100 uppercase tracking-widest">
+              DESKTOP MONITOR REQUIRED
+            </h2>
+            <p className="text-sm text-red-400 font-medium">
+              "The Live Judge Command Console is restricted to large screen monitors only."
+            </p>
+          </div>
+
+          <div className="bg-zinc-900/60 p-4 rounded-xl border border-white/5 space-y-2">
+            <p className="text-[10px] text-zinc-500 uppercase leading-relaxed">
+              To guarantee full control grid rendering and prevent display overlaps, please log into this console on a PC, Laptop, or Tablet landscape mode (1024px width or wider).
+            </p>
+          </div>
+
+          <a 
+            href="/dashboard"
+            className="block w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-xs uppercase tracking-widest rounded-xl border border-white/5 transition-all"
+          >
+            Return to Dashboard
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
