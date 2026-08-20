@@ -17,6 +17,7 @@ export interface MysteryEntity {
   aliases: string[];
   attributes: Record<string, boolean>;
   tags: string[];
+  questions?: { text: string; answer: boolean }[];
 }
 
 export interface QuestionDefinition {

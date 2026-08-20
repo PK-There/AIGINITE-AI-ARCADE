@@ -161,8 +161,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const chosenEntity = MYSTERY_ENTITIES[randomIndex];
     setMysteryEntity(chosenEntity);
 
-    const initialPool = generateQuestionPool(ROUND_CONFIG.questionOptionCount);
-    setAvailableQuestions(initialPool);
+    if (chosenEntity.questions && chosenEntity.questions.length > 0) {
+      const customPool: QuestionDefinition[] = chosenEntity.questions.map((q, idx) => ({
+        id: `q-${idx}`,
+        text: q.text,
+        attributeKey: `custom-q-${idx}`,
+        evaluate: () => q.answer
+      }));
+      setAvailableQuestions(customPool);
+    } else {
+      const initialPool = generateQuestionPool(ROUND_CONFIG.questionOptionCount);
+      setAvailableQuestions(initialPool);
+    }
 
     setSelectedQuestionId(null);
     setQuestionHistory([]);
@@ -270,6 +280,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setAvailableQuestions(prev => {
         const remaining = prev.filter(q => q.id !== question.id);
+        if (mysteryEntity.questions && mysteryEntity.questions.length > 0) {
+          return remaining;
+        }
         const askedIds = [...questionHistory.map(h => h.questionId), question.id];
         const newPool = generateQuestionPool(ROUND_CONFIG.questionOptionCount, askedIds);
         return newPool.length >= 6 ? newPool : remaining;
