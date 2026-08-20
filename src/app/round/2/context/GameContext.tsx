@@ -36,6 +36,7 @@ interface GameContextType {
   toggleSound: () => void;
   assignedEntityOverride: (entityId: string) => void;
   round2Active: boolean;
+  isCaptain: boolean;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -60,6 +61,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [round2Active, setRound2Active] = useState<boolean>(false);
+  const [isCaptain, setIsCaptain] = useState<boolean>(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -94,6 +96,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 college: 'College Competition',
                 avatarSeed: tId,
               });
+              setIsCaptain(data.captainId === user.uid);
             }
           }
         }
@@ -407,6 +410,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleSound,
         assignedEntityOverride,
         round2Active,
+        isCaptain,
       }}
     >
       {children}

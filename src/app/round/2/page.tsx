@@ -12,7 +12,9 @@ import { LeaderboardScreen } from './components/LeaderboardScreen';
 
 import { Lock, ShieldAlert } from 'lucide-react';
 
-function Round2LockedScreen() {
+function Round2LockedScreen({ reason }: { reason: 'admin' | 'captain' }) {
+  const isAdminLock = reason === 'admin';
+
   return (
     <div className="min-h-screen bg-[#0d1117] text-white flex flex-col justify-center items-center p-6 font-mono relative overflow-hidden">
       <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(168,85,247,0.12),transparent)]" />
@@ -24,20 +26,24 @@ function Round2LockedScreen() {
 
         <div className="space-y-2">
           <h2 className="text-xl font-black text-slate-100 uppercase tracking-widest">
-            ROUND 2 IS CURRENTLY LOCKED
+            {isAdminLock ? "ROUND 2 IS CURRENTLY LOCKED" : "LEADER ACCESS REQUIRED"}
           </h2>
           <p className="text-sm text-amber-500/80 font-medium">
-            "Round 2 will unlock when the tournament organizer officially starts it."
+            {isAdminLock 
+              ? "\"Round 2 will unlock when the tournament organizer officially starts it.\"" 
+              : "Round 2 gameplay is restricted to the Team Captain. Please coordinate and play this round on their device."}
           </p>
         </div>
 
         <div className="bg-zinc-900/60 p-4 rounded-xl border border-white/5 space-y-2">
           <div className="flex items-center gap-2 text-xs text-zinc-400 justify-center">
             <ShieldAlert className="w-4 h-4 text-amber-500" />
-            <span>STANDBY MODE ACTIVE</span>
+            <span>{isAdminLock ? "STANDBY MODE ACTIVE" : "AUTHENTICATION FLAG LOCKED"}</span>
           </div>
           <p className="text-[10px] text-zinc-500 uppercase leading-relaxed">
-            Please wait for the live announcement. The screen will automatically refresh and unlock when the round begins.
+            {isAdminLock 
+              ? "Please wait for the live announcement. The screen will automatically refresh and unlock when the round begins."
+              : "Your team progress will be synced instantly. Ask your captain to enter the arena and submit the guess."}
           </p>
         </div>
 
@@ -53,11 +59,15 @@ function Round2LockedScreen() {
 }
 
 const GameContent: React.FC = () => {
-  const { gameState, round2Active } = useGame();
+  const { gameState, round2Active, isCaptain } = useGame();
   const { screen } = gameState;
 
   if (!round2Active) {
-    return <Round2LockedScreen />;
+    return <Round2LockedScreen reason="admin" />;
+  }
+
+  if (!isCaptain) {
+    return <Round2LockedScreen reason="captain" />;
   }
 
   return (
