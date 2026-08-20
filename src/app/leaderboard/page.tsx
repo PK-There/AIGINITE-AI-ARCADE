@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Trophy, Timer, Medal, Loader2, Zap, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import confetti from "canvas-confetti";
 
 interface LeaderboardTeam {
   id: string;
@@ -15,6 +16,7 @@ interface LeaderboardTeam {
   score: number;
   totalTime?: number;
   captainId?: string;
+  podiumPlace?: number | null;
 }
 
 export default function LeaderboardPage() {
@@ -23,6 +25,22 @@ export default function LeaderboardPage() {
   const [teams, setTeams] = useState<LeaderboardTeam[]>([]);
   const [currentUid, setCurrentUid] = useState<string | null>(null);
   const [myTeamId, setMyTeamId] = useState<string | null>(null);
+
+  const firstPlace = teams.find(t => t.podiumPlace === 1);
+  const secondPlace = teams.find(t => t.podiumPlace === 2);
+  const thirdPlace = teams.find(t => t.podiumPlace === 3);
+  const showPodium = !!(firstPlace || secondPlace || thirdPlace);
+
+  useEffect(() => {
+    if (!loading && showPodium) {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.5 },
+        colors: ['#f59e0b', '#cbd5e1', '#b45309', '#00F0FF'],
+      });
+    }
+  }, [loading, showPodium]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -48,6 +66,7 @@ export default function LeaderboardPage() {
           score: d.data().teamScore || 0,
           totalTime: d.data().totalTime || 0,
           captainId: d.data().captainId || null,
+          podiumPlace: d.data().podiumPlace || null,
         }));
         setTeams(list);
       } catch (err) {
@@ -100,6 +119,67 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <>
+            {/* Grand Victory Podium Showcase */}
+            {showPodium && (
+              <div className="bg-zinc-950/80 border-2 border-yellow-500/20 p-6 rounded-3xl text-center space-y-6 shadow-[0_0_50px_rgba(234,179,8,0.15)] relative overflow-hidden animate-fade-in mb-6">
+                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(234,179,8,0.08),transparent)]" />
+                
+                <div className="space-y-1 relative z-10">
+                  <span className="text-[10px] font-mono uppercase tracking-[.25em] text-yellow-500 font-bold block animate-pulse">
+                    🏆 TOURNAMENT CHAMPIONS 🏆
+                  </span>
+                  <h2 className="text-2xl font-black text-white uppercase tracking-wider font-display">
+                    GRAND VICTORY STANDINGS
+                  </h2>
+                </div>
+
+                <div className="flex items-end justify-center gap-4 sm:gap-6 pt-4 relative z-10">
+                  {/* 2nd Place */}
+                  {secondPlace && (
+                    <div className="flex flex-col items-center gap-2 group animate-rise">
+                      <div className="relative">
+                        <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.4)] animate-bounce inline-block" style={{ animationDuration: '3s' }}>🥈</span>
+                      </div>
+                      <div className="bg-slate-300/10 border border-slate-300/20 rounded-t-2xl w-24 sm:w-28 h-24 sm:h-28 flex flex-col justify-center items-center p-3 text-center shadow-[0_0_15px_rgba(203,213,225,0.05)]">
+                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider block mb-1">2nd Place</span>
+                        <span className="text-xs font-black text-white truncate max-w-full block">{secondPlace.name}</span>
+                        <span className="text-xs font-mono text-slate-400 mt-1 font-bold">{secondPlace.score} PTS</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 1st Place */}
+                  {firstPlace && (
+                    <div className="flex flex-col items-center gap-2 group animate-rise">
+                      <div className="relative">
+                        <span className="text-4xl filter drop-shadow-[0_0_15px_rgba(245,158,11,0.6)] animate-bounce inline-block" style={{ animationDuration: '2s' }}>👑</span>
+                      </div>
+                      <div className="bg-yellow-500/10 border-2 border-yellow-500/40 rounded-t-2xl w-28 sm:w-32 h-32 sm:h-36 flex flex-col justify-center items-center p-3 text-center shadow-[0_0_30px_rgba(245,158,11,0.15)] relative">
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-yellow-500 shadow-[0_0_10px_#f59e0b]" />
+                        <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest block mb-1">CHAMPION</span>
+                        <span className="text-sm font-black text-white truncate max-w-full block uppercase">{firstPlace.name}</span>
+                        <span className="text-sm font-mono text-yellow-400 mt-1 font-black">{firstPlace.score} PTS</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3rd Place */}
+                  {thirdPlace && (
+                    <div className="flex flex-col items-center gap-2 group animate-rise">
+                      <div className="relative">
+                        <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(180,83,9,0.4)] animate-bounce inline-block" style={{ animationDuration: '4s' }}>🥉</span>
+                      </div>
+                      <div className="bg-amber-700/15 border border-amber-700/20 rounded-t-2xl w-24 sm:w-28 h-20 sm:h-24 flex flex-col justify-center items-center p-3 text-center shadow-[0_0_15px_rgba(180,83,9,0.05)]">
+                        <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider block mb-1">3rd Place</span>
+                        <span className="text-xs font-black text-white truncate max-w-full block">{thirdPlace.name}</span>
+                        <span className="text-xs font-mono text-amber-500 mt-1 font-bold">{thirdPlace.score} PTS</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Top-6 Finalists Section */}
             {top6.length > 0 && (
               <div className="space-y-2">
@@ -118,8 +198,14 @@ export default function LeaderboardPage() {
                     <div
                       key={team.id}
                       className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
-                        idx === 0
-                          ? "border-yellow-500/40 bg-yellow-500/5"
+                        team.podiumPlace === 1
+                          ? "border-yellow-500/40 bg-yellow-500/5 shadow-[0_0_15px_rgba(245,158,11,0.05)]"
+                          : team.podiumPlace === 2
+                          ? "border-slate-300/30 bg-slate-300/5"
+                          : team.podiumPlace === 3
+                          ? "border-amber-700/30 bg-amber-700/5"
+                          : idx === 0
+                          ? "border-yellow-500/20 bg-yellow-500/5"
                           : isMyTeam
                           ? "border-[#d9ff52]/30 bg-[#d9ff52]/5"
                           : "border-white/10 bg-zinc-900/50"
@@ -127,19 +213,37 @@ export default function LeaderboardPage() {
                     >
                       {/* Rank */}
                       <div className="w-7 text-center font-mono font-black text-sm text-zinc-400">
-                        {idx + 1}
+                        {team.podiumPlace === 1 && "👑"}
+                        {team.podiumPlace === 2 && "🥈"}
+                        {team.podiumPlace === 3 && "🥉"}
+                        {!team.podiumPlace && (idx + 1)}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-white text-sm truncate">{team.name}</p>
-                          {idx < 6 && (
+                          {team.podiumPlace === 1 && (
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[8px] font-mono-ui uppercase tracking-wider px-1.5 py-0.5 animate-pulse">
+                              CHAMPION
+                            </Badge>
+                          )}
+                          {team.podiumPlace === 2 && (
+                            <Badge className="bg-slate-300/20 text-slate-300 border border-slate-300/30 text-[8px] font-mono-ui uppercase tracking-wider px-1.5 py-0.5">
+                              RUNNER UP
+                            </Badge>
+                          )}
+                          {team.podiumPlace === 3 && (
+                            <Badge className="bg-amber-700/20 text-amber-600 border border-amber-700/30 text-[8px] font-mono-ui uppercase tracking-wider px-1.5 py-0.5">
+                              3rd Place
+                            </Badge>
+                          )}
+                          {idx < 6 && !team.podiumPlace && (
                             <Badge className="bg-[#d9ff52]/15 text-[#d9ff52] border-[#d9ff52]/30 text-[8px] font-mono-ui uppercase tracking-wider px-1.5 py-0.5">
                               FINALIST
                             </Badge>
                           )}
-                          {idx === 0 && <Medal className="w-3.5 h-3.5 text-yellow-400" />}
+                          {idx === 0 && !team.podiumPlace && <Medal className="w-3.5 h-3.5 text-yellow-400" />}
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-zinc-500 font-mono mt-0.5">
                           <span className="flex items-center gap-1">
@@ -199,8 +303,8 @@ export default function LeaderboardPage() {
               </div>
             )}
 
-            {/* Podium Top 3 (decorative) */}
-            {top6.length >= 3 && (
+            {/* Podium Top 3 (fallback decorative) */}
+            {!showPodium && top6.length >= 3 && (
               <div className="space-y-2 pt-2">
                 <p className="text-[10px] font-mono-ui text-zinc-600 uppercase tracking-widest text-center">TOP 3 PODIUM</p>
                 <div className="flex items-end justify-center gap-3">

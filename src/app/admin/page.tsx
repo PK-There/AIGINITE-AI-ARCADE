@@ -61,6 +61,7 @@ interface TeamData {
   round1State?: any;
   r3Image?: string;
   r3Product?: any;
+  podiumPlace?: number | null;
 }
 
 export default function AdminPage() {
@@ -193,6 +194,25 @@ export default function AdminPage() {
       soundFx.playCorrect();
     } catch (err) {
       console.error("Failed to update team:", err);
+    }
+  };
+
+  // Award Podium Place (1st, 2nd, or 3rd)
+  const handleAwardPlace = async (teamId: string, place: number) => {
+    try {
+      const teamRef = doc(db, "teams", teamId);
+      const currentPlace = selectedR3Submission?.podiumPlace;
+      const newPlace = currentPlace === place ? null : place;
+
+      await updateDoc(teamRef, {
+        podiumPlace: newPlace,
+      });
+
+      setSelectedR3Submission((prev: any) => prev ? { ...prev, podiumPlace: newPlace } : null);
+      soundFx.playCorrect();
+    } catch (err) {
+      console.error("Failed to award podium place:", err);
+      alert("Error awarding place: " + (err as Error).message);
     }
   };
 
@@ -713,10 +733,18 @@ export default function AdminPage() {
                           }`}
                         >
                           <td className="py-4 px-6 text-center font-black">
-                            {idx + 1}
+                            {team.podiumPlace === 1 && "👑"}
+                            {team.podiumPlace === 2 && "🥈"}
+                            {team.podiumPlace === 3 && "🥉"}
+                            {!team.podiumPlace && (idx + 1)}
                           </td>
                           <td className="py-4 px-6">
-                            <span className="font-bold text-white block">{team.name}</span>
+                            <span className="font-bold text-white block flex items-center gap-1.5">
+                              {team.name}
+                              {team.podiumPlace === 1 && " 👑"}
+                              {team.podiumPlace === 2 && " 🥈"}
+                              {team.podiumPlace === 3 && " 🥉"}
+                            </span>
                             <span className="text-[10px] text-zinc-500 block">ID: {team.id}</span>
                           </td>
                           <td className="py-4 px-6 text-center font-bold tracking-wider text-purple-400">
@@ -1192,7 +1220,44 @@ export default function AdminPage() {
               )}
             </div>
 
-            <div className="flex justify-end border-t border-white/5 bg-zinc-900/40 px-6 py-4">
+            <div className="flex justify-between items-center border-t border-white/5 bg-zinc-900/40 px-6 py-4">
+              {/* Award buttons */}
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleAwardPlace(selectedR3Submission.id, 1)}
+                  className={`text-[10px] font-black uppercase tracking-wider h-8 rounded-lg cursor-pointer transition-all ${
+                    selectedR3Submission.podiumPlace === 1
+                      ? "bg-yellow-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                      : "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-black border border-yellow-500/20"
+                  }`}
+                >
+                  👑 1st Place
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleAwardPlace(selectedR3Submission.id, 2)}
+                  className={`text-[10px] font-black uppercase tracking-wider h-8 rounded-lg cursor-pointer transition-all ${
+                    selectedR3Submission.podiumPlace === 2
+                      ? "bg-slate-300 text-black shadow-[0_0_10px_rgba(203,213,225,0.5)]"
+                      : "bg-slate-300/10 text-slate-300 hover:bg-slate-300 hover:text-black border border-slate-300/20"
+                  }`}
+                >
+                  🥈 2nd Place
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => handleAwardPlace(selectedR3Submission.id, 3)}
+                  className={`text-[10px] font-black uppercase tracking-wider h-8 rounded-lg cursor-pointer transition-all ${
+                    selectedR3Submission.podiumPlace === 3
+                      ? "bg-amber-700 text-white shadow-[0_0_10px_rgba(180,83,9,0.5)]"
+                      : "bg-amber-700/10 text-amber-700 hover:bg-amber-700 hover:text-white border border-amber-700/20"
+                  }`}
+                >
+                  🥉 3rd Place
+                </Button>
+              </div>
+
               <Button
                 size="sm"
                 onClick={() => setSelectedR3Submission(null)}
