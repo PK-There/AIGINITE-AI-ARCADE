@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef } from 'react';
-import { Eye, ZoomIn, ShieldAlert, CheckCircle2, XCircle, ArrowRight, Award, Sparkles, AlertTriangle, Scan, Layers } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Eye, ZoomIn, ShieldAlert, CheckCircle2, XCircle, ArrowRight, Award, Sparkles, AlertTriangle, Scan, Layers, FileText } from 'lucide-react';
 import { DEEPFAKE_SCENARIOS, DeepfakeItem } from '../data/deepfakeData';
 import { PlayerScoreData, calculateSpeedBonus } from '../types-r1';
 import { soundFx } from '../utils/audio';
@@ -16,6 +16,7 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
   onComplete,
   onReturnToHub,
 }) => {
+  const [scenarios, setScenarios] = useState<DeepfakeItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<boolean | string | null>(null);
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
@@ -32,7 +33,23 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
   const questionStartTimeRef = useRef<number>(Date.now());
   const gameStartTimeRef = useRef<number>(Date.now());
 
-  const currentItem: DeepfakeItem = DEEPFAKE_SCENARIOS[currentIndex];
+  // Pick 10 random scenarios on mount
+  useEffect(() => {
+    const shuffled = [...DEEPFAKE_SCENARIOS].sort(() => 0.5 - Math.random());
+    setScenarios(shuffled.slice(0, 10));
+  }, []);
+
+  if (scenarios.length === 0) {
+    return (
+      <div className="w-full min-h-[400px] flex flex-col items-center justify-center border-2 border-[#00F0FF] bg-[#0B0F19] rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.2)] p-6">
+        <span className="text-[10px] font-mono-ui uppercase tracking-[.25em] text-[#00F0FF]/60 animate-pulse">
+          Loading Forensic Scenarios...
+        </span>
+      </div>
+    );
+  }
+
+  const currentItem = scenarios[currentIndex];
 
   const handleSelectAnswer = (ans: boolean | string) => {
     if (isAnswerLocked) return;
@@ -57,7 +74,7 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
 
   const handleNextScenario = () => {
     soundFx.playKeypress();
-    if (currentIndex + 1 < DEEPFAKE_SCENARIOS.length) {
+    if (currentIndex + 1 < scenarios.length) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setIsAnswerLocked(false);
@@ -119,7 +136,7 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
 
             <div className="flex items-center gap-3">
               <div className="bg-[#FF007F]/20 border border-[#FF007F] px-4 py-2 rounded text-[#FF007F] font-bold text-xs sm:text-sm tabular-nums">
-                CASE {currentIndex + 1} / {DEEPFAKE_SCENARIOS.length}
+                CASE {currentIndex + 1} / {scenarios.length}
               </div>
             </div>
           </div>
@@ -152,30 +169,68 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
                 {currentItem.promptOrContext}
               </p>
 
-              {/* Binary Mode Image & Buttons */}
-              {currentItem.type === 'binary' && currentItem.singleImage && (
+              {/* Binary Mode Image/Video/Audio/Text & Buttons */}
+              {currentItem.type === 'binary' && (
                 <div className="space-y-4">
-                  <div className="relative max-w-2xl mx-auto rounded-lg overflow-hidden border border-[#00F0FF]/40 bg-black group">
-                    <img
-                      src={currentItem.singleImage.url}
-                      alt="Inspection Target"
-                      className="w-full h-[260px] sm:h-[360px] object-cover transition-transform duration-300 group-hover:scale-105"
-                      referrerPolicy="no-referrer"
-                    />
+                  {currentItem.singleImage ? (() => {
+                    const mediaUrl = currentItem.singleImage.url;
+                    const isVideo = mediaUrl && (mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.webm') || mediaUrl.toLowerCase().endsWith('.mov'));
+                    const isAudio = mediaUrl && (mediaUrl.toLowerCase().endsWith('.mp3') || mediaUrl.toLowerCase().endsWith('.wav') || mediaUrl.toLowerCase().endsWith('.ogg'));
 
-                    {/* Forensic Tell Zoom Ring */}
-                    {showForensicOverlay && currentItem.zoomCoordinates && (
-                      <div
-                        className="absolute border-2 border-[#FF007F] bg-[#FF007F]/20 rounded-full w-24 h-24 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-pulse-glow flex items-center justify-center shadow-[0_0_20px_#FF007F]"
-                        style={{
-                          left: `${currentItem.zoomCoordinates.x}%`,
-                          top: `${currentItem.zoomCoordinates.y}%`,
-                        }}
-                      >
-                        <div className="w-2 h-2 rounded-full bg-[#FF007F]" />
+                    return (
+                      <div className="relative max-w-2xl mx-auto rounded-lg overflow-hidden border border-[#00F0FF]/40 bg-black group">
+                        {isVideo ? (
+                          <video
+                            src={mediaUrl}
+                            controls
+                            autoPlay
+                            loop
+                            className="w-full h-[260px] sm:h-[360px] object-contain"
+                          />
+                        ) : isAudio ? (
+                          <div className="w-full h-[180px] sm:h-[220px] flex flex-col items-center justify-center p-6 bg-[#070b13] border-b border-[#00F0FF]/20">
+                            <Layers className="w-10 h-10 text-[#FF007F] animate-pulse mb-3" />
+                            <span className="text-xs text-slate-400 mb-4 font-mono">NEURAL VOICE SYNTHESIS VERIFICATION</span>
+                            <audio src={mediaUrl} controls className="w-full max-w-md mx-auto" />
+                          </div>
+                        ) : (
+                          <img
+                            src={mediaUrl}
+                            alt="Inspection Target"
+                            className="w-full h-[260px] sm:h-[360px] object-cover transition-transform duration-300 group-hover:scale-105"
+                            referrerPolicy="no-referrer"
+                          />
+                        )}
+
+                        {/* Forensic Tell Zoom Ring */}
+                        {showForensicOverlay && currentItem.zoomCoordinates && !isVideo && !isAudio && (
+                          <div
+                            className="absolute border-2 border-[#FF007F] bg-[#FF007F]/20 rounded-full w-24 h-24 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-pulse-glow flex items-center justify-center shadow-[0_0_20px_#FF007F]"
+                            style={{
+                              left: `${currentItem.zoomCoordinates.x}%`,
+                              top: `${currentItem.zoomCoordinates.y}%`,
+                            }}
+                          >
+                            <div className="w-2 h-2 rounded-full bg-[#FF007F]" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    );
+                  })() : (
+                    /* Text-only layout */
+                    <div className="relative max-w-2xl mx-auto rounded-lg border border-[#00F0FF]/30 bg-[#070b13] p-6 text-left shadow-inner">
+                      <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-bold uppercase tracking-wider mb-3">
+                        <FileText className="w-4 h-4 text-cyan-400 animate-pulse" />
+                        <span>TEXT EVIDENCE ANALYSIS</span>
+                      </div>
+                      <div className="p-4 rounded border border-slate-800 bg-slate-950/60 font-sans text-sm text-slate-300 leading-relaxed max-h-[220px] overflow-y-auto">
+                        {currentItem.promptOrContext}
+                      </div>
+                      <p className="text-[10px] text-slate-500 italic mt-2 font-mono">
+                        // System instruction: review narrative structure, claims logic, and phrasing markers.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Real vs AI Action Buttons */}
                   <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-2">
@@ -321,7 +376,7 @@ export const Subgame3Deepfake: React.FC<Subgame3DeepfakeProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto text-left">
                 <div className="bg-[#0B0F19] border border-slate-800 p-3 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">DETECTED</span>
-                  <span className="text-lg font-bold text-[#39FF14]">{correctCount} / {DEEPFAKE_SCENARIOS.length}</span>
+                  <span className="text-lg font-bold text-[#39FF14]">{correctCount} / {scenarios.length}</span>
                 </div>
                 <div className="bg-[#0B0F19] border border-slate-800 p-3 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">BASE PTS</span>
