@@ -87,6 +87,10 @@ export interface GameState {
   soundEnabled: boolean;
   guessesRemaining: number;
   guessHistory: string[];
+  currentEntityIndex: number;
+  mysteryEntitiesList: MysteryEntity[];
+  segmentScores: number[];
+  segmentTimes: number[];
 }
 
 export interface ScoringConfig {

@@ -62,8 +62,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [round2Active, setRound2Active] = useState<boolean>(false);
   const [isCaptain, setIsCaptain] = useState<boolean>(false);
-  const [guessesRemaining, setGuessesRemaining] = useState<number>(3);
+  const [guessesRemaining, setGuessesRemaining] = useState<number>(2);
   const [guessHistory, setGuessHistory] = useState<string[]>([]);
+  const [currentEntityIndex, setCurrentEntityIndex] = useState<number>(0);
+  const [mysteryEntitiesList, setMysteryEntitiesList] = useState<MysteryEntity[]>([]);
+  const [segmentScores, setSegmentScores] = useState<number[]>([0, 0, 0]);
+  const [segmentTimes, setSegmentTimes] = useState<number[]>([0, 0, 0]);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -147,6 +151,22 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTeam(selectedTeam);
   }, []);
 
+  // Helper to load customized entity questions
+  const loadEntityQuestions = useCallback((entity: MysteryEntity) => {
+    if (entity.questions && entity.questions.length > 0) {
+      const customPool: QuestionDefinition[] = entity.questions.map((q, idx) => ({
+        id: `q-${idx}`,
+        text: q.text,
+        attributeKey: `custom-q-${idx}`,
+        evaluate: () => q.answer
+      }));
+      setAvailableQuestions(customPool);
+    } else {
+      const initialPool = generateQuestionPool(ROUND_CONFIG.questionOptionCount);
+      setAvailableQuestions(initialPool);
+    }
+  }, []);
+
   // Admin / debug override for assigning specific entities
   const assignedEntityOverride = useCallback((entityId: string) => {
     const found = MYSTERY_ENTITIES.find(e => e.id === entityId);
@@ -159,22 +179,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const startRound = useCallback(() => {
     soundEffects.playClick();
 
-    const randomIndex = Math.floor(Math.random() * MYSTERY_ENTITIES.length);
-    const chosenEntity = MYSTERY_ENTITIES[randomIndex];
-    setMysteryEntity(chosenEntity);
+    // Select 3 unique mystery entities randomly
+    const shuffled = [...MYSTERY_ENTITIES].sort(() => 0.5 - Math.random());
+    const chosenList = shuffled.slice(0, 3);
+    setMysteryEntitiesList(chosenList);
+    setCurrentEntityIndex(0);
+    setSegmentScores([0, 0, 0]);
+    setSegmentTimes([0, 0, 0]);
 
-    if (chosenEntity.questions && chosenEntity.questions.length > 0) {
-      const customPool: QuestionDefinition[] = chosenEntity.questions.map((q, idx) => ({
-        id: `q-${idx}`,
-        text: q.text,
-        attributeKey: `custom-q-${idx}`,
-        evaluate: () => q.answer
-      }));
-      setAvailableQuestions(customPool);
-    } else {
-      const initialPool = generateQuestionPool(ROUND_CONFIG.questionOptionCount);
-      setAvailableQuestions(initialPool);
-    }
+    const chosenEntity = chosenList[0];
+    setMysteryEntity(chosenEntity);
+    loadEntityQuestions(chosenEntity);
 
     setSelectedQuestionId(null);
     setQuestionHistory([]);
@@ -182,7 +197,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFinalGuess('');
     setGuessCorrect(false);
     setFinalScore(0);
-    setGuessesRemaining(3);
+    setGuessesRemaining(2); // Set guesses remaining to 2
     setGuessHistory([]);
     setTimeRemainingSec(ROUND_CONFIG.roundDurationSeconds);
     setStartTime(Date.now());
@@ -192,7 +207,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTimeout(() => {
       setScreen('GAMEPLAY');
     }, 1800);
-  }, []);
+  }, [loadEntityQuestions]);
 
   // Live Timer Countdown Effect
   useEffect(() => {
@@ -225,15 +240,76 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [screen]);
 
   // Handle timeout
-  const handleTimeout = useCallback(() => {
+  const handleTimeout = useCallback(async () => {
     soundEffects.playNo();
-    setEndTime(Date.now());
-    setFinalGuess('(Time Expired)');
-    setGuessCorrect(false);
-    setFinalScore(0);
 
-    setScreen('RESULT');
-  }, []);
+    const segScore = 0;
+    const segTime = 120;
+
+    const updatedScores = [...segmentScores];
+    updatedScores[currentEntityIndex] = segScore;
+    setSegmentScores(updatedScores);
+
+    const updatedTimes = [...segmentTimes];
+    updatedTimes[currentEntityIndex] = segTime;
+    setSegmentTimes(updatedTimes);
+
+    if (currentEntityIndex < 2) {
+      const nextIdx = currentEntityIndex + 1;
+      setCurrentEntityIndex(nextIdx);
+      const nextEntity = mysteryEntitiesList[nextIdx];
+      setMysteryEntity(nextEntity);
+      loadEntityQuestions(nextEntity);
+
+      setGuessesRemaining(2);
+      setGuessHistory([]);
+      setTimeRemainingSec(ROUND_CONFIG.roundDurationSeconds);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      const now = Date.now();
+      setEndTime(now);
+      setFinalGuess('(Time Expired)');
+
+      const totalRound2Score = updatedScores.reduce((sum, s) => sum + s, 0);
+      const totalRound2Time = updatedTimes.reduce((sum, s) => sum + s, 0);
+      setFinalScore(totalRound2Score);
+      setGuessCorrect(totalRound2Score > 0);
+
+      if (userTeamId && totalRound2Score > 0) {
+        try {
+          await updateDoc(doc(db, 'teams', userTeamId), {
+            teamScore: increment(totalRound2Score),
+            totalTime: increment(totalRound2Time),
+          });
+        } catch (err) {
+          console.error('Failed to update Firestore team score in Round 2:', err);
+        }
+      }
+
+      const newEntry: LeaderboardEntry = {
+        id: `lb_${Date.now()}`,
+        rank: 1,
+        teamName: team.name,
+        score: totalRound2Score,
+        questionsUsed: 5,
+        timeTakenSec: totalRound2Time,
+        isCurrentTeam: true,
+        status: totalRound2Score > 0 ? 'CORRECT' : 'WRONG',
+        completedAt: 'Round 2 - Live',
+      };
+
+      setLeaderboard((prev) => {
+        const filtered = prev.filter(e => e.teamName !== team.name).map(e => ({ ...e, isCurrentTeam: false }));
+        const combined = [...filtered, newEntry];
+        return combined.sort((a, b) => b.score - a.score).map((e, idx) => ({ ...e, rank: idx + 1 }));
+      });
+
+      setScreen('RESULT');
+    }
+  }, [currentEntityIndex, mysteryEntitiesList, segmentScores, segmentTimes, loadEntityQuestions, team.name, userTeamId]);
 
   // Select question
   const selectQuestion = useCallback((questionId: string) => {
@@ -312,69 +388,46 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const matchResult = checkGuessMatch(trimmedGuess, mysteryEntity);
     const isCorrect = matchResult.isCorrect;
 
-    if (isCorrect) {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      const now = Date.now();
-      setEndTime(now);
-      setFinalGuess(trimmedGuess);
-      setGuessCorrect(true);
+    const elapsed = 120 - timeRemainingSec;
 
-      const elapsed = 120 - timeRemainingSec;
+    if (isCorrect) {
+      // Correct!
       const questionsUsed = Math.min(5, Math.floor(elapsed / 20) + 1);
       const scoreResult = calculateRoundScore(true, questionsUsed, timeRemainingSec);
-      setFinalScore(scoreResult.totalScore);
+      const segScore = scoreResult.totalScore;
+      const segTime = elapsed;
+
+      const updatedScores = [...segmentScores];
+      updatedScores[currentEntityIndex] = segScore;
+      setSegmentScores(updatedScores);
+
+      const updatedTimes = [...segmentTimes];
+      updatedTimes[currentEntityIndex] = segTime;
+      setSegmentTimes(updatedTimes);
 
       soundEffects.playVictory();
       try {
         confetti({
-          particleCount: 120,
-          spread: 80,
+          particleCount: 80,
+          spread: 60,
           origin: { y: 0.6 },
           colors: ['#06b6d4', '#3b82f6', '#10b981', '#38bdf8', '#ffffff'],
         });
       } catch {}
 
-      const timeTaken = ROUND_CONFIG.roundDurationSeconds - timeRemainingSec;
+      if (currentEntityIndex < 2) {
+        // Move to next mystery entity segment
+        const nextIdx = currentEntityIndex + 1;
+        setCurrentEntityIndex(nextIdx);
+        const nextEntity = mysteryEntitiesList[nextIdx];
+        setMysteryEntity(nextEntity);
+        loadEntityQuestions(nextEntity);
 
-      if (userTeamId && scoreResult.totalScore > 0) {
-        try {
-          await updateDoc(doc(db, 'teams', userTeamId), {
-            teamScore: increment(scoreResult.totalScore),
-            totalTime: increment(timeTaken),
-          });
-        } catch (err) {
-          console.error('Failed to update Firestore team score in Round 2:', err);
-        }
-      }
-
-      const newEntry: LeaderboardEntry = {
-        id: `lb_${Date.now()}`,
-        rank: 1,
-        teamName: team.name,
-        score: scoreResult.totalScore,
-        questionsUsed,
-        timeTakenSec: timeTaken,
-        isCurrentTeam: true,
-        status: 'CORRECT',
-        completedAt: 'Round 2 - Live',
-      };
-
-      setLeaderboard((prev) => {
-        const filtered = prev.filter(e => e.teamName !== team.name).map(e => ({ ...e, isCurrentTeam: false }));
-        const combined = [...filtered, newEntry];
-        return combined.sort((a, b) => b.score - a.score).map((e, idx) => ({ ...e, rank: idx + 1 }));
-      });
-
-      setScreen('RESULT');
-    } else {
-      soundEffects.playNo();
-      const remaining = guessesRemaining - 1;
-      setGuessesRemaining(remaining);
-
-      if (remaining <= 0) {
+        setGuessesRemaining(2);
+        setGuessHistory([]);
+        setTimeRemainingSec(ROUND_CONFIG.roundDurationSeconds);
+      } else {
+        // All 3 segments complete!
         if (timerRef.current) {
           clearInterval(timerRef.current);
           timerRef.current = null;
@@ -382,20 +435,32 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const now = Date.now();
         setEndTime(now);
         setFinalGuess(trimmedGuess);
-        setGuessCorrect(false);
-        setFinalScore(0);
+        setGuessCorrect(true);
 
-        const timeTaken = ROUND_CONFIG.roundDurationSeconds - timeRemainingSec;
+        const totalRound2Score = updatedScores.reduce((sum, s) => sum + s, 0);
+        const totalRound2Time = updatedTimes.reduce((sum, s) => sum + s, 0);
+        setFinalScore(totalRound2Score);
+
+        if (userTeamId && totalRound2Score > 0) {
+          try {
+            await updateDoc(doc(db, 'teams', userTeamId), {
+              teamScore: increment(totalRound2Score),
+              totalTime: increment(totalRound2Time),
+            });
+          } catch (err) {
+            console.error('Failed to update Firestore team score in Round 2:', err);
+          }
+        }
 
         const newEntry: LeaderboardEntry = {
           id: `lb_${Date.now()}`,
           rank: 1,
           teamName: team.name,
-          score: 0,
+          score: totalRound2Score,
           questionsUsed: 5,
-          timeTakenSec: timeTaken,
+          timeTakenSec: totalRound2Time,
           isCurrentTeam: true,
-          status: 'WRONG',
+          status: 'CORRECT',
           completedAt: 'Round 2 - Live',
         };
 
@@ -407,8 +472,85 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setScreen('RESULT');
       }
+    } else {
+      // Incorrect guess
+      soundEffects.playNo();
+      const remaining = guessesRemaining - 1;
+      setGuessesRemaining(remaining);
+
+      if (remaining <= 0) {
+        // Segment failure!
+        const segScore = 0;
+        const segTime = elapsed;
+
+        const updatedScores = [...segmentScores];
+        updatedScores[currentEntityIndex] = segScore;
+        setSegmentScores(updatedScores);
+
+        const updatedTimes = [...segmentTimes];
+        updatedTimes[currentEntityIndex] = segTime;
+        setSegmentTimes(updatedTimes);
+
+        if (currentEntityIndex < 2) {
+          // Move to next segment
+          const nextIdx = currentEntityIndex + 1;
+          setCurrentEntityIndex(nextIdx);
+          const nextEntity = mysteryEntitiesList[nextIdx];
+          setMysteryEntity(nextEntity);
+          loadEntityQuestions(nextEntity);
+
+          setGuessesRemaining(2);
+          setGuessHistory([]);
+          setTimeRemainingSec(ROUND_CONFIG.roundDurationSeconds);
+        } else {
+          // All 3 segments complete!
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          const now = Date.now();
+          setEndTime(now);
+          setFinalGuess(trimmedGuess);
+
+          const totalRound2Score = updatedScores.reduce((sum, s) => sum + s, 0);
+          const totalRound2Time = updatedTimes.reduce((sum, s) => sum + s, 0);
+          setFinalScore(totalRound2Score);
+          setGuessCorrect(totalRound2Score > 0);
+
+          if (userTeamId && totalRound2Score > 0) {
+            try {
+              await updateDoc(doc(db, 'teams', userTeamId), {
+                teamScore: increment(totalRound2Score),
+                totalTime: increment(totalRound2Time),
+              });
+            } catch (err) {
+              console.error('Failed to update Firestore team score in Round 2:', err);
+            }
+          }
+
+          const newEntry: LeaderboardEntry = {
+            id: `lb_${Date.now()}`,
+            rank: 1,
+            teamName: team.name,
+            score: totalRound2Score,
+            questionsUsed: 5,
+            timeTakenSec: totalRound2Time,
+            isCurrentTeam: true,
+            status: totalRound2Score > 0 ? 'CORRECT' : 'WRONG',
+            completedAt: 'Round 2 - Live',
+          };
+
+          setLeaderboard((prev) => {
+            const filtered = prev.filter(e => e.teamName !== team.name).map(e => ({ ...e, isCurrentTeam: false }));
+            const combined = [...filtered, newEntry];
+            return combined.sort((a, b) => b.score - a.score).map((e, idx) => ({ ...e, rank: idx + 1 }));
+          });
+
+          setScreen('RESULT');
+        }
+      }
     }
-  }, [mysteryEntity, guessesRemaining, guessHistory, timeRemainingSec, team.name, userTeamId]);
+  }, [mysteryEntity, guessesRemaining, guessHistory, timeRemainingSec, team.name, userTeamId, currentEntityIndex, mysteryEntitiesList, segmentScores, segmentTimes, loadEntityQuestions]);
 
   const navigateToScreen = useCallback((newScreen: GameScreen) => {
     soundEffects.playClick();
@@ -424,8 +566,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFinalGuess('');
     setGuessCorrect(false);
     setFinalScore(0);
-    setGuessesRemaining(3);
+    setGuessesRemaining(2);
     setGuessHistory([]);
+    setCurrentEntityIndex(0);
+    setMysteryEntitiesList([]);
+    setSegmentScores([0, 0, 0]);
+    setSegmentTimes([0, 0, 0]);
     setTimeRemainingSec(ROUND_CONFIG.roundDurationSeconds);
   }, []);
 
@@ -450,6 +596,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     soundEnabled,
     guessesRemaining,
     guessHistory,
+    currentEntityIndex,
+    mysteryEntitiesList,
+    segmentScores,
+    segmentTimes,
   };
 
   return (

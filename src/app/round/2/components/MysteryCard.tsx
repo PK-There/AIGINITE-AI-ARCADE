@@ -20,11 +20,17 @@ export const MysteryCard: React.FC = () => {
       <div className="relative z-10 flex flex-col items-center justify-center max-w-xl mx-auto space-y-4">
         
         {/* Lock / Security Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 shadow-inner">
-          <Lock className="w-4 h-4 text-cyan-400 animate-pulse" />
-          <span className="font-mono-code font-bold tracking-wider text-xs uppercase">
-            MYSTERY ENTITY
-          </span>
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 shadow-inner">
+            <Lock className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <span className="font-mono-code font-bold tracking-wider text-xs uppercase">
+              MYSTERY ENTITY
+            </span>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-950/85 border border-purple-500/40 text-purple-300 shadow-inner font-mono-code text-xs font-bold uppercase tracking-wider">
+            <span>CHARACTER {gameState.currentEntityIndex + 1} / 3</span>
+          </div>
         </div>
 
         {/* Big Classified Header Display */}
