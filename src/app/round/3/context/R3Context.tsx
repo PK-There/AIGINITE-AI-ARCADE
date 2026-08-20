@@ -42,44 +42,368 @@ export type R3State = {
   myTeamId: string | null;
 };
 
-// ── Challenge pool – drawn per team deterministically ────────────────────────
+// ── Challenge pool – drawn per team dynamically ────────────────────────
 const CHALLENGE_POOL: ChallengeCard[][] = [
   [
-    { label: "WHO",        value: "The campus commuter" },
-    { label: "PROBLEM",    value: "Loses time between classes" },
-    { label: "PRODUCT",    value: "A micro-mobility concierge" },
-    { label: "LIMITATION", value: "Must work offline first" },
+    {
+      "label": "WHO",
+      "value": "College student"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Always late"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Must work without internet"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Smart mirror overlay"
+    }
   ],
   [
-    { label: "WHO",        value: "The first-year student" },
-    { label: "PROBLEM",    value: "Cannot find their people" },
-    { label: "PRODUCT",    value: "A low-pressure connection ritual" },
-    { label: "LIMITATION", value: "No profile photos allowed" },
+    {
+      "label": "WHO",
+      "value": "Chef"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Can't remember names"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Can only give 3-word answers"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Wearable audio clip"
+    }
   ],
   [
-    { label: "WHO",        value: "The overloaded student leader" },
-    { label: "PROBLEM",    value: "Has five responsibilities at once" },
-    { label: "PRODUCT",    value: "A calm command center" },
-    { label: "LIMITATION", value: "One screen, zero notifications" },
+    {
+      "label": "WHO",
+      "value": "Astronaut"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Gets bored easily"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Must rhyme"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Holographic projector"
+    }
   ],
   [
-    { label: "WHO",        value: "The night-shift student worker" },
-    { label: "PROBLEM",    value: "Cannot access campus help after dark" },
-    { label: "PRODUCT",    value: "A midnight campus safety layer" },
-    { label: "LIMITATION", value: "Works with one thumb" },
+    {
+      "label": "WHO",
+      "value": "Dog"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Has no money"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Only communicates in emojis"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Smart collar with screen"
+    }
   ],
   [
-    { label: "WHO",        value: "The student with a side hustle" },
-    { label: "PROBLEM",    value: "Cannot turn momentum into money" },
-    { label: "PRODUCT",    value: "A tiny storefront for campus talent" },
-    { label: "LIMITATION", value: "Zero budget to start" },
+    {
+      "label": "WHO",
+      "value": "Professor"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Lost their notes"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Has a terrible personality"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "CLI / Terminal tool"
+    }
   ],
   [
-    { label: "WHO",        value: "The graduating senior" },
-    { label: "PROBLEM",    value: "Feels unready for life after college" },
-    { label: "PRODUCT",    value: "A confidence-building launch plan" },
-    { label: "LIMITATION", value: "Built in ten tiny steps" },
+    {
+      "label": "WHO",
+      "value": "Superhero"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Can't decide what to eat"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Gets 1 prediction wrong daily"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "AR sunglasses"
+    }
   ],
+  [
+    {
+      "label": "WHO",
+      "value": "Sleepy doctor"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Keeps misplacing keys"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Can only speak in haikus"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Keyring beacon"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Digital nomad"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Paralyzed by choices"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Whispers everything"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Browser extension"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Time traveler"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Constantly overspends"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Believes it is the year 1800"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Pocket calculator format"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "High school teacher"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Stage fright / shy"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Self-destructs after 5 mins"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Interactive whiteboard app"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Grumpy detective"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Forgets passwords"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Communicates via receipt printer"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Thermal desk printer"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Busy parent"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Overcooks every meal"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Sarcastic and unhelpful"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Smart fridge magnet"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Museum curator"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Afraid of the dark"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Only responds when sung to"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Motion-sensing lamp"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Barista"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Mixing up orders"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Must use pirate slang"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Receipt barcode scanner"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Video game streamer"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Falls asleep randomly"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Can never say the letter 'E'"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Stream overlay chatbot"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Taxi driver"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Gets lost in small rooms"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Acts like a strict sports coach"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Dashboard companion puck"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Airline pilot"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Always forgets anniversaries"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Answers only with questions"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Smart wristband"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Fitness coach"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Addicted to snoozing alarms"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Talks in extreme corporate jargon"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Vending-machine interface"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Librarian"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Constant hiccups"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Gives overly dramatic responses"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Bookmark scanner"
+    }
+  ],
+  [
+    {
+      "label": "WHO",
+      "value": "Cyberpunk hacker"
+    },
+    {
+      "label": "PROBLEM",
+      "value": "Hates small talk"
+    },
+    {
+      "label": "LIMITATION",
+      "value": "Can only output ASCII art"
+    },
+    {
+      "label": "PRODUCT",
+      "value": "Retro handheld console"
+    }
+  ]
 ];
 
 const TEAM_COLORS = [
@@ -201,13 +525,15 @@ export function R3Provider({ children, isCaptain = false }: { children: ReactNod
     })),
     // Called once when leaderboard has determined top-6 finalists
     loadFinalists: (finalists) => {
+      // Shuffle challenge pool to assign random challenge cards per team
+      const shuffledChallenges = [...CHALLENGE_POOL].sort(() => 0.5 - Math.random());
       const teams: R3Team[] = finalists.map((f, idx) => ({
         id: f.id,
         name: f.name,
         short: f.name.slice(0, 2).toUpperCase(),
         color: TEAM_COLORS[idx % TEAM_COLORS.length].color,
         tint: TEAM_COLORS[idx % TEAM_COLORS.length].tint,
-        challenge: CHALLENGE_POOL[idx % CHALLENGE_POOL.length],
+        challenge: shuffledChallenges[idx % shuffledChallenges.length],
         ready: false,
         submitted: false,
         promptsUsed: 0,

@@ -61,6 +61,27 @@ export function checkGuessMatch(guess: string, entity: MysteryEntity): { isCorre
     }
   }
 
+  // 2.5 Word-level fuzzy matches (e.g. "walter" matches "Walter White")
+  const guessWords = cleanGuess.split(/\s+/);
+  const nameWords = cleanName.split(/\s+/);
+  for (const gw of guessWords) {
+    if (gw.length >= 3) {
+      for (const nw of nameWords) {
+        if (nw === gw || (nw.length >= 4 && levenshteinDistance(gw, nw) <= 1)) {
+          return { isCorrect: true, matchedAs: entity.name };
+        }
+      }
+      for (const alias of entity.aliases) {
+        const aliasWords = normalizeString(alias).split(/\s+/);
+        for (const aw of aliasWords) {
+          if (aw === gw || (aw.length >= 4 && levenshteinDistance(gw, aw) <= 1)) {
+            return { isCorrect: true, matchedAs: alias };
+          }
+        }
+      }
+    }
+  }
+
   // 3. Substring match for substantial names (>= 5 chars)
   if (cleanName.length >= 5 && (cleanName.includes(cleanGuess) || cleanGuess.includes(cleanName))) {
     return { isCorrect: true, matchedAs: entity.name };

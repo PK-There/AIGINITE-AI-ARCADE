@@ -12,7 +12,8 @@ export const QuestionGrid: React.FC = () => {
     selectedQuestionId, 
     questionHistory, 
     maxQuestions, 
-    isAIAnalyzing 
+    isAIAnalyzing,
+    timeRemainingSec
   } = gameState;
 
   const questionsRemaining = Math.max(0, maxQuestions - questionHistory.length);
@@ -55,17 +56,40 @@ export const QuestionGrid: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-          {availableQuestions.slice(0, 6).map((q, idx) => (
-            <QuestionCard
-              key={q.id}
-              question={q}
-              index={idx}
-              isSelected={selectedQuestionId === q.id}
-              isUsed={usedQuestionIds.includes(q.id)}
-              onSelect={selectQuestion}
-              disabled={isAIAnalyzing || isOutOfQuestions}
-            />
-          ))}
+          {availableQuestions.map((q) => {
+            const match = q.id.match(/q-(\d+)/);
+            const qIndex = match ? parseInt(match[1]) : 0;
+            const elapsed = 120 - timeRemainingSec;
+            const isRevealed = elapsed >= qIndex * 10;
+
+            if (!isRevealed) {
+              return (
+                <div
+                  key={q.id}
+                  className="p-5 rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/20 flex flex-col justify-center items-center text-center space-y-1 h-[90px] opacity-40 select-none animate-pulse"
+                >
+                  <span className="text-[10px] font-mono tracking-widest text-purple-500/70 uppercase">
+                    [ CLUE {qIndex + 1} LOCKED ]
+                  </span>
+                  <span className="text-[9px] font-mono text-zinc-600">
+                    Unlocks in {Math.max(0, qIndex * 10 - elapsed)}s
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <QuestionCard
+                key={q.id}
+                question={q}
+                index={qIndex}
+                isSelected={selectedQuestionId === q.id}
+                isUsed={usedQuestionIds.includes(q.id)}
+                onSelect={selectQuestion}
+                disabled={isAIAnalyzing || isOutOfQuestions}
+              />
+            );
+          })}
         </div>
       )}
 
