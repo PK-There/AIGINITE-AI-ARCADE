@@ -125,26 +125,16 @@ export const RoundCompleteScreen: React.FC = () => {
         </div>
 
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col items-center justify-center gap-4">
           <button
             id="view-leaderboard-complete-btn"
             type="button"
             onClick={() => navigateToScreen('LEADERBOARD')}
-            className="w-full sm:w-auto flex-1 py-4 sm:py-5 px-8 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-display font-black text-lg sm:text-xl tracking-wider uppercase flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/30 transition-all cursor-pointer"
+            className="w-full max-w-md py-4 sm:py-5 px-8 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-display font-black text-lg sm:text-xl tracking-wider uppercase flex items-center justify-center gap-3 shadow-xl shadow-cyan-500/30 transition-all cursor-pointer"
           >
             <Trophy className="w-6 h-6 text-slate-950" />
             <span>VIEW LEADERBOARD</span>
             <ArrowRight className="w-5 h-5" />
-          </button>
-
-          <button
-            id="restart-round-btn"
-            type="button"
-            onClick={restartGame}
-            className="w-full sm:w-auto py-4 sm:py-5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-display font-bold text-sm sm:text-base tracking-wider uppercase flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4 text-cyan-400" />
-            <span>PLAY AGAIN</span>
           </button>
         </div>
 

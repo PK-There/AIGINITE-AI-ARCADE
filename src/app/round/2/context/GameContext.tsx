@@ -85,7 +85,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fetch real user & team info + dynamic leaderboard from Firestore
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
+    let unsubTeam: (() => void) | null = null;
+
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
       try {
         const userSnap = await getDoc(doc(db, 'users', user.uid));
@@ -93,50 +95,66 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const tId = userSnap.data().teamId;
           if (tId) {
             setUserTeamId(tId);
-            const teamSnap = await getDoc(doc(db, 'teams', tId));
-            if (teamSnap.exists()) {
-              const data = teamSnap.data();
-              setTeam({
-                id: tId,
-                name: data.name || 'My Team',
-                college: 'College Competition',
-                avatarSeed: tId,
-              });
-              setIsCaptain(data.captainId === user.uid);
-            }
+            
+            // Listen to team document in real-time
+            unsubTeam = onSnapshot(doc(db, 'teams', tId), (teamSnap) => {
+              if (teamSnap.exists()) {
+                const data = teamSnap.data();
+                setTeam({
+                  id: tId,
+                  name: data.name || 'My Team',
+                  college: 'College Competition',
+                  avatarSeed: tId,
+                });
+                setIsCaptain(data.captainId === user.uid);
+                
+                // If they completed Round 2, lock screen to ROUND_COMPLETE
+                if (data.round2Completed) {
+                  setFinalScore(data.round2Score || 0);
+                  setSegmentScores(data.round2Scores || [0, 0, 0]);
+                  setSegmentTimes(data.round2Times || [0, 0, 0]);
+                  if (data.round2Entities) {
+                    setMysteryEntitiesList(data.round2Entities);
+                  }
+                  setScreen('ROUND_COMPLETE');
+                }
+              }
+            });
           }
         }
       } catch (err) {
         console.error('Failed to load user team in Round 2:', err);
       }
-
-      // Fetch dynamic leaderboard from Firestore
-      try {
-        const teamsRef = collection(db, 'teams');
-        const q = query(teamsRef, orderBy('teamScore', 'desc'), limit(10));
-        const snap = await getDocs(q);
-
-        const list: LeaderboardEntry[] = snap.docs.map((d, idx) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            rank: idx + 1,
-            teamName: data.name || 'Unnamed',
-            score: data.teamScore || 0,
-            questionsUsed: 0,
-            timeTakenSec: data.totalTime || 0,
-            status: 'CORRECT',
-            completedAt: 'Live Standings',
-            isCurrentTeam: userTeamId === d.id,
-          };
-        });
-        setLeaderboard(list);
-      } catch (err) {
-        console.error('Failed to load leaderboard in Round 2:', err);
-      }
     });
 
-    return () => unsub();
+    // Fetch dynamic leaderboard from Firestore in real-time
+    const teamsRef = collection(db, 'teams');
+    const q = query(teamsRef, orderBy('teamScore', 'desc'), limit(10));
+    const unsubLeaderboard = onSnapshot(q, (snap) => {
+      const list: LeaderboardEntry[] = snap.docs.map((d, idx) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          rank: idx + 1,
+          teamName: data.name || 'Unnamed',
+          score: data.teamScore || 0,
+          questionsUsed: 0,
+          timeTakenSec: data.totalTime || 0,
+          status: 'CORRECT',
+          completedAt: 'Live Standings',
+          isCurrentTeam: userTeamId === d.id,
+        };
+      });
+      setLeaderboard(list);
+    }, (err) => {
+      console.error('Failed to load leaderboard in Round 2:', err);
+    });
+
+    return () => {
+      unsubAuth();
+      if (unsubTeam) unsubTeam();
+      unsubLeaderboard();
+    };
   }, [userTeamId]);
 
   // Toggle sound
@@ -278,11 +296,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setFinalScore(totalRound2Score);
       setGuessCorrect(totalRound2Score > 0);
 
-      if (userTeamId && totalRound2Score > 0) {
+      if (userTeamId) {
         try {
           await updateDoc(doc(db, 'teams', userTeamId), {
             teamScore: increment(totalRound2Score),
             totalTime: increment(totalRound2Time),
+            round2Completed: true,
+            round2Score: totalRound2Score,
+            round2Scores: updatedScores,
+            round2Times: updatedTimes,
+            round2Entities: mysteryEntitiesList.map(e => ({ name: e.name, category: e.category, description: e.description }))
           });
         } catch (err) {
           console.error('Failed to update Firestore team score in Round 2:', err);
@@ -441,11 +464,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const totalRound2Time = updatedTimes.reduce((sum, s) => sum + s, 0);
         setFinalScore(totalRound2Score);
 
-        if (userTeamId && totalRound2Score > 0) {
+        if (userTeamId) {
           try {
             await updateDoc(doc(db, 'teams', userTeamId), {
               teamScore: increment(totalRound2Score),
               totalTime: increment(totalRound2Time),
+              round2Completed: true,
+              round2Score: totalRound2Score,
+              round2Scores: updatedScores,
+              round2Times: updatedTimes,
+              round2Entities: mysteryEntitiesList.map(e => ({ name: e.name, category: e.category, description: e.description }))
             });
           } catch (err) {
             console.error('Failed to update Firestore team score in Round 2:', err);
@@ -517,11 +545,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setFinalScore(totalRound2Score);
           setGuessCorrect(totalRound2Score > 0);
 
-          if (userTeamId && totalRound2Score > 0) {
+          if (userTeamId) {
             try {
               await updateDoc(doc(db, 'teams', userTeamId), {
                 teamScore: increment(totalRound2Score),
                 totalTime: increment(totalRound2Time),
+                round2Completed: true,
+                round2Score: totalRound2Score,
+                round2Scores: updatedScores,
+                round2Times: updatedTimes,
+                round2Entities: mysteryEntitiesList.map(e => ({ name: e.name, category: e.category, description: e.description }))
               });
             } catch (err) {
               console.error('Failed to update Firestore team score in Round 2:', err);

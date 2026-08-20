@@ -90,6 +90,13 @@ export default function Round1Page() {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [activeView]);
 
+  // If the round has been finished, lock the view to the qualification scorecard (VictoryView)
+  useEffect(() => {
+    if (teamState?.isFinished) {
+      setActiveView(5);
+    }
+  }, [teamState?.isFinished]);
+
   // Real-time Firestore Sync
   useEffect(() => {
     if (!userTeamId) return;
