@@ -34,13 +34,61 @@ export const Subgame1Quiz: React.FC<Subgame1QuizProps> = ({
   const gameStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    // Fisher-Yates shuffle for truly uniform randomization across the full question bank
-    const pool = [...QUIZ_QUESTIONS];
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
+    // Separate by difficulty to ensure progression
+    const easyPool = QUIZ_QUESTIONS.filter(q => q.difficulty === 'EASY');
+    const mediumPool = QUIZ_QUESTIONS.filter(q => q.difficulty === 'MEDIUM');
+    const hardPool = QUIZ_QUESTIONS.filter(q => q.difficulty === 'HARD');
+
+    // Also the user mentioned doc1 (SET 01), let's ensure at least 1-2 questions are from SET 01
+    const doc1Easy = easyPool.filter(q => q.category === 'SET 01');
+    const otherEasy = easyPool.filter(q => q.category !== 'SET 01');
+
+    const shuffleArray = <T,>(array: T[]): T[] => {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+
+    // Pick 6 Easy (ensure 1 is from doc1 if available), 2 Medium, 2 Hard
+    let selectedEasy = [];
+    if (doc1Easy.length > 0) {
+      selectedEasy = [
+        ...shuffleArray(doc1Easy).slice(0, 1),
+        ...shuffleArray(otherEasy).slice(0, 5)
+      ];
+    } else {
+      selectedEasy = shuffleArray(easyPool).slice(0, 6);
     }
-    setQuestions(pool.slice(0, 10));
+    
+    // In case we want to shuffle the selected 6 easy among themselves
+    selectedEasy = shuffleArray(selectedEasy);
+
+    const selectedQuestions = [
+      ...selectedEasy,
+      ...shuffleArray(mediumPool).slice(0, 2),
+      ...shuffleArray(hardPool).slice(0, 2),
+    ];
+
+    // Important: Shuffle options for each question so 'A' isn't always correct
+    const finalizedQuestions = selectedQuestions.map(q => {
+      const optionsWithIndex = q.options.map((opt, idx) => ({ 
+        text: opt, 
+        isCorrect: idx === q.correctIndex 
+      }));
+      const shuffledOptions = shuffleArray(optionsWithIndex);
+      const newCorrectIndex = shuffledOptions.findIndex(o => o.isCorrect);
+      
+      return {
+        ...q,
+        options: shuffledOptions.map(o => o.text),
+        correctIndex: newCorrectIndex,
+      };
+    });
+
+    setQuestions(finalizedQuestions);
   }, []);
 
   const currentQ: QuizQuestion = questions[currentIndex];
