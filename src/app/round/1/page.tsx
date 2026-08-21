@@ -94,8 +94,10 @@ export default function Round1Page() {
   useEffect(() => {
     if (teamState?.isFinished) {
       setActiveView(5);
+    } else if (activeView === 5) {
+      setActiveView('HUB');
     }
-  }, [teamState?.isFinished]);
+  }, [teamState?.isFinished, activeView]);
 
   // Real-time Firestore Sync
   useEffect(() => {
