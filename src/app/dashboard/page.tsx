@@ -285,7 +285,6 @@ export default function DashboardPage() {
                 <p className="text-[10px] text-[#d9ff52]/50 font-mono tracking-widest">FINAL ROUND</p>
                 <p className="font-bold text-white text-sm">BUILD UNDER PRESSURE</p>
               </div>
-              <Badge className="bg-[#d9ff52]/10 text-[#d9ff52] border-[#d9ff52]/20 text-[10px]">TOP 6</Badge>
             </div>
           </Link>
         </div>

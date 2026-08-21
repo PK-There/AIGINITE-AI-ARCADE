@@ -87,8 +87,8 @@ export default function LeaderboardPage() {
     );
   }
 
-  const top6 = teams.slice(0, 6);
-  const rest = teams.slice(6);
+  const top4 = teams.slice(0, 4);
+  const rest = teams.slice(4);
 
   return (
     <div className="relative min-h-screen bg-background pb-20">
@@ -180,17 +180,17 @@ export default function LeaderboardPage() {
               </div>
             )}
 
-            {/* Top-6 Finalists Section */}
-            {top6.length > 0 && (
+            {/* Top-4 Finalists Section */}
+            {top4.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Zap className="w-3.5 h-3.5 text-[#d9ff52]" />
                   <p className="text-[10px] font-mono-ui font-bold uppercase tracking-widest text-[#d9ff52]">
-                    TOP 6 — AUTO-QUALIFY FOR FINAL ROUND
+                    TOP 4 — AUTO-QUALIFY FOR FINAL ROUND
                   </p>
                 </div>
 
-                {top6.map((team, idx) => {
+                {top4.map((team, idx) => {
                   const isMyTeam = team.id === myTeamId;
                   const iAmCaptain = isMyTeam && team.captainId === currentUid;
 
@@ -238,7 +238,7 @@ export default function LeaderboardPage() {
                               3rd Place
                             </Badge>
                           )}
-                          {idx < 6 && !team.podiumPlace && (
+                          {idx < 4 && !team.podiumPlace && (
                             <Badge className="bg-[#d9ff52]/15 text-[#d9ff52] border-[#d9ff52]/30 text-[8px] font-mono-ui uppercase tracking-wider px-1.5 py-0.5">
                               FINALIST
                             </Badge>
@@ -268,7 +268,7 @@ export default function LeaderboardPage() {
                   );
                 })}
 
-                {/* Top-6 Separator */}
+                {/* Top-4 Separator */}
                 <div className="border-t border-dashed border-[#d9ff52]/20 pt-2">
                   <p className="text-[9px] font-mono-ui text-zinc-600 uppercase tracking-widest text-center">
                     — Teams below do not qualify for the Final Round —
@@ -286,7 +286,7 @@ export default function LeaderboardPage() {
                     className="flex items-center gap-4 bg-zinc-900/30 border border-white/5 p-4 rounded-2xl"
                   >
                     <div className="w-7 text-center font-mono font-black text-sm text-zinc-600">
-                      {idx + 7}
+                      {idx + 5}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-zinc-400 text-sm truncate">{team.name}</p>
