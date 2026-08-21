@@ -1846,7 +1846,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     "id": 123,
     "category": "SET 13",
-    "question": "In Blade Runner 2049, what is the holographic AI companion played by Ana de Armas named?",
+    "question": "In Blade Runner 2049, what is the holographic A I companion played by Ana de Armas named?",
     "options": [
       "Joi",
       "Ava",
