@@ -304,7 +304,7 @@ export default function LeaderboardPage() {
             )}
 
             {/* Podium Top 3 (fallback decorative) */}
-            {!showPodium && top6.length >= 3 && (
+            {!showPodium && top4.length >= 3 && (
               <div className="space-y-2 pt-2">
                 <p className="text-[10px] font-mono-ui text-zinc-600 uppercase tracking-widest text-center">TOP 3 PODIUM</p>
                 <div className="flex items-end justify-center gap-3">
@@ -312,24 +312,24 @@ export default function LeaderboardPage() {
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 font-bold text-xs">2</div>
                     <div className="bg-zinc-900/60 border border-zinc-800 rounded-t-lg w-20 h-20 flex flex-col justify-center items-center p-2 text-center">
-                      <span className="text-[9px] font-bold text-white truncate max-w-full">{top6[1].name}</span>
-                      <span className="text-[10px] font-mono text-zinc-400 mt-1 font-bold">{top6[1].score}</span>
+                      <span className="text-[9px] font-bold text-white truncate max-w-full">{top4[1].name}</span>
+                      <span className="text-[10px] font-mono text-zinc-400 mt-1 font-bold">{top4[1].score}</span>
                     </div>
                   </div>
                   {/* 1st */}
                   <div className="flex flex-col items-center gap-2">
                     <Medal className="w-5 h-5 text-yellow-400 animate-bounce" />
                     <div className="bg-primary/20 border border-primary/30 rounded-t-lg w-24 h-28 flex flex-col justify-center items-center p-2 text-center shadow-[0_0_20px_rgba(168,85,247,0.15)]">
-                      <span className="text-xs font-black text-white truncate max-w-full">{top6[0].name}</span>
-                      <span className="text-xs font-mono text-primary mt-1 font-black">{top6[0].score}</span>
+                      <span className="text-xs font-black text-white truncate max-w-full">{top4[0].name}</span>
+                      <span className="text-xs font-mono text-primary mt-1 font-black">{top4[0].score}</span>
                     </div>
                   </div>
                   {/* 3rd */}
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-9 h-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-amber-700 font-bold text-xs">3</div>
                     <div className="bg-zinc-900/60 border border-zinc-800 rounded-t-lg w-20 h-16 flex flex-col justify-center items-center p-2 text-center">
-                      <span className="text-[9px] font-bold text-white truncate max-w-full">{top6[2].name}</span>
-                      <span className="text-[10px] font-mono text-zinc-400 mt-1 font-bold">{top6[2].score}</span>
+                      <span className="text-[9px] font-bold text-white truncate max-w-full">{top4[2].name}</span>
+                      <span className="text-[10px] font-mono text-zinc-400 mt-1 font-bold">{top4[2].score}</span>
                     </div>
                   </div>
                 </div>
