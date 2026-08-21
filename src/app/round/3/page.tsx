@@ -54,9 +54,9 @@ export default function Round3Page() {
         const userData = userSnap.exists() ? userSnap.data() : null;
         let teamId = userData?.teamId as string | null;
 
-        // 2. Get top-1 team by teamScore (configured to 1 team for testing/checking)
+        // 2. Get top-4 teams by teamScore to match leaderboard qualification logic
         const teamsRef = collection(db, "teams");
-        const q = query(teamsRef, orderBy("teamScore", "desc"), limit(2));
+        const q = query(teamsRef, orderBy("teamScore", "desc"), limit(4));
         const snap = await getDocs(q);
 
         let top6 = snap.docs.map(d => ({
